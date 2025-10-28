@@ -3,9 +3,8 @@ import json, os
 import openai
 
 app = Flask(__name__)
-openai.api_key = os.getenv("OPENAI_API_KEY")
+openai.api_key = os.getenv("OPENAI_API_KEY")  # Add in Render environment
 
-# Load quiz dynamically based on exam + subtopic/year
 def load_quiz(exam, subtopic):
     path = os.path.join("quizzes", exam, f"{subtopic}.json")
     if os.path.exists(path):
@@ -26,8 +25,7 @@ def get_subtopics(exam):
 
 @app.route('/get-quiz/<exam>/<subtopic>', methods=['GET'])
 def get_quiz(exam, subtopic):
-    quiz_data = load_quiz(exam, subtopic)
-    return jsonify(quiz_data)
+    return jsonify(load_quiz(exam, subtopic))
 
 @app.route('/submit/<exam>/<subtopic>', methods=['POST'])
 def submit_quiz(exam, subtopic):
@@ -78,5 +76,8 @@ Generate a friendly, actionable summary for the student:
             max_tokens=200
         )
         return response['choices'][0]['message']['content']
-    except Exception as e:
+    except:
         return "Could not generate AI summary at this moment."
+
+if __name__ == "__main__":
+    app.run(debug=True)
