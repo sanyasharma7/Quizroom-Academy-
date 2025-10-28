@@ -1,16 +1,13 @@
 from flask import Flask, render_template, jsonify, request
-import json
-import os
-import openai  # pip install openai
+import json, os
+import openai
 
 app = Flask(__name__)
-
-# Set your OpenAI API key as environment variable in Render: OPENAI_API_KEY
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-# Load quizzes dynamically
-def load_quiz(exam):
-    path = os.path.join("quizzes", f"{exam}.json")
+# Load quiz dynamically based on exam + subtopic/year
+def load_quiz(exam, subtopic):
+    path = os.path.join("quizzes", exam, f"{subtopic}.json")
     if os.path.exists(path):
         with open(path, "r") as f:
             return json.load(f)
@@ -20,15 +17,22 @@ def load_quiz(exam):
 def index():
     return render_template("index.html")
 
-@app.route('/get-quiz/<exam>', methods=['GET'])
-def get_quiz(exam):
-    quiz_data = load_quiz(exam)
+@app.route('/get_subtopics/<exam>', methods=['GET'])
+def get_subtopics(exam):
+    exam_path = os.path.join("quizzes", exam)
+    if os.path.exists(exam_path):
+        return jsonify([f.replace(".json","") for f in os.listdir(exam_path)])
+    return jsonify([])
+
+@app.route('/get-quiz/<exam>/<subtopic>', methods=['GET'])
+def get_quiz(exam, subtopic):
+    quiz_data = load_quiz(exam, subtopic)
     return jsonify(quiz_data)
 
-@app.route('/submit/<exam>', methods=['POST'])
-def submit_quiz(exam):
+@app.route('/submit/<exam>/<subtopic>', methods=['POST'])
+def submit_quiz(exam, subtopic):
     data = request.json
-    quiz_data = load_quiz(exam)
+    quiz_data = load_quiz(exam, subtopic)
     score = 0
     incorrect_questions = []
 
@@ -41,7 +45,6 @@ def submit_quiz(exam):
                 "correct": q['answer']
             })
 
-    # Generate AI summary
     summary_text = generate_ai_summary(score, len(quiz_data), incorrect_questions)
     
     return jsonify({
