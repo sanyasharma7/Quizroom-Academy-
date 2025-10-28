@@ -1,0 +1,7 @@
+[
+  {"question":"Most abundant white blood cell in humans?","options":["Neutrophils","Lymphocytes","Eosinophils","Monocytes"],"answer":"Neutrophils"},
+  {"question":"Normal range of hemoglobin in adult male (g/dL)?","options":["12-15","13-17","10-12","15-18"],"answer":"13-17"},
+  {"question":"Which vitamin deficiency causes rickets?","options":["Vitamin A","Vitamin C","Vitamin D","Vitamin K"],"answer":"Vitamin D"},
+  {"question":"Most common type of leukemia in adults?","options":["ALL","AML","CLL","CML"],"answer":"AML"},
+  {"question":"Drug of choice for Myasthenia Gravis?","options":["Neostigmine","Atropine","Pyridoxine","Levodopa"],"answer":"Neostigmine"}
+]
