@@ -1,3 +1,4 @@
+# app.py
 from flask import Flask, render_template, jsonify, request
 import json, os
 import openai
@@ -5,6 +6,7 @@ import openai
 app = Flask(__name__)
 openai.api_key = os.getenv("OPENAI_API_KEY")  # Add in Render environment
 
+# Load quiz
 def load_quiz(exam, subtopic):
     path = os.path.join("quizzes", exam, f"{subtopic}.json")
     if os.path.exists(path):
@@ -16,14 +18,14 @@ def load_quiz(exam, subtopic):
 def index():
     return render_template("index.html")
 
-@app.route('/get_subtopics/<exam>', methods=['GET'])
+@app.route('/get_subtopics/<exam>')
 def get_subtopics(exam):
-    exam_path = os.path.join("quizzes", exam)
-    if os.path.exists(exam_path):
-        return jsonify([f.replace(".json","") for f in os.listdir(exam_path)])
+    path = os.path.join("quizzes", exam)
+    if os.path.exists(path):
+        return jsonify([f.replace(".json","") for f in os.listdir(path)])
     return jsonify([])
 
-@app.route('/get-quiz/<exam>/<subtopic>', methods=['GET'])
+@app.route('/get-quiz/<exam>/<subtopic>')
 def get_quiz(exam, subtopic):
     return jsonify(load_quiz(exam, subtopic))
 
@@ -55,18 +57,12 @@ def submit_quiz(exam, subtopic):
 def generate_ai_summary(score, total, incorrect_questions):
     if len(incorrect_questions) == 0:
         return "Excellent! You answered all questions correctly. Keep up the good work!"
-    
     weak_questions_text = "\n".join([f"Q: {q['question']} | Correct: {q['correct']}" for q in incorrect_questions])
     prompt = f"""
 You are a helpful study assistant. 
-A student took a quiz and scored {score}/{total}. 
-Here are the questions they got wrong:
+A student scored {score}/{total}. Here are questions they got wrong:
 {weak_questions_text}
-
-Generate a friendly, actionable summary for the student:
-- Highlight weak topics
-- Suggest how to revise
-- Motivate them to improve
+Generate a friendly, actionable summary for the student.
 """
     try:
         response = openai.ChatCompletion.create(
@@ -77,7 +73,4 @@ Generate a friendly, actionable summary for the student:
         )
         return response['choices'][0]['message']['content']
     except:
-        return "Could not generate AI summary at this moment."
-
-if __name__ == "__main__":
-    app.run(debug=True)
+        return "Could not generate AI summary."
