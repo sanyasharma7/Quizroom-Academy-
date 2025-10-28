@@ -1,23 +1,30 @@
 from flask import Flask, render_template, jsonify, request
 import json
+import os
 
 app = Flask(__name__)
 
-# Load quiz data
-with open("quiz_data.json", "r") as f:
-    quiz_data = json.load(f)
+# Load quizzes dynamically
+def load_quiz(exam):
+    path = os.path.join("quizzes", f"{exam}.json")
+    if os.path.exists(path):
+        with open(path, "r") as f:
+            return json.load(f)
+    return []
 
 @app.route('/')
 def index():
     return render_template("index.html")
 
-@app.route('/get-quiz', methods=['GET'])
-def get_quiz():
+@app.route('/get-quiz/<exam>', methods=['GET'])
+def get_quiz(exam):
+    quiz_data = load_quiz(exam)
     return jsonify(quiz_data)
 
-@app.route('/submit', methods=['POST'])
-def submit_quiz():
+@app.route('/submit/<exam>', methods=['POST'])
+def submit_quiz(exam):
     data = request.json
+    quiz_data = load_quiz(exam)
     score = 0
     for i, q in enumerate(quiz_data):
         if data.get(str(i)) == q['answer']:
