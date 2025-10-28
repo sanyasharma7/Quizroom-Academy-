@@ -1,50 +1,121 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Quizroom Academy</title>
-    <link rel="stylesheet" href="/static/style.css">
+  <meta charset="UTF-8">
+  <title>Quizroom Academy</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <h1>Quizroom Academy</h1>
-    <div id="quiz"></div>
-    <button id="submitBtn">Submit</button>
-    <div id="result"></div>
+<body class="bg-gray-50 p-6 font-sans">
+  <div class="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow-lg">
+    <h1 class="text-3xl font-bold text-center mb-6">Quizroom Academy</h1>
 
-    <script>
-        let quizData = [];
-        fetch("/get-quiz")
-            .then(res => res.json())
-            .then(data => {
-                quizData = data;
-                const quizDiv = document.getElementById("quiz");
-                data.forEach((q, index) => {
-                    let html = `<div class="question"><p>${q.question}</p>`;
-                    q.options.forEach(option => {
-                        html += `<label><input type="radio" name="${index}" value="${option}">${option}</label><br>`;
-                    });
-                    html += `</div>`;
-                    quizDiv.innerHTML += html;
-                });
-            });
+    <!-- Exam Selection -->
+    <div class="mb-4 text-center">
+      <label class="mr-2 font-semibold">Select Exam:</label>
+      <select id="examSelect" class="border rounded px-2 py-1">
+        <option value="upsc">UPSC</option>
+        <option value="neet_pg">NEET PG</option>
+        <option value="ssc">SSC</option>
+      </select>
+      <button id="loadBtn" class="bg-blue-500 text-white px-4 py-1 rounded ml-2">Load Quiz</button>
+    </div>
 
-        document.getElementById("submitBtn").addEventListener("click", () => {
-            const answers = {};
-            quizData.forEach((q, i) => {
-                const selected = document.querySelector(`input[name='${i}']:checked`);
-                answers[i] = selected ? selected.value : "";
-            });
+    <!-- Quiz Container -->
+    <div id="quizContainer" class="mt-6"></div>
 
-            fetch("/submit", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(answers)
-            })
-            .then(res => res.json())
-            .then(data => {
-                document.getElementById("result").innerText = `Score: ${data.score}/${data.total}`;
-            });
-        });
-    </script>
+    <!-- Navigation Buttons -->
+    <div id="navButtons" class="mt-4 flex justify-between hidden">
+      <button id="prevBtn" class="bg-gray-300 px-4 py-1 rounded">Previous</button>
+      <button id="nextBtn" class="bg-gray-300 px-4 py-1 rounded">Next</button>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="mt-4 text-center">
+      <button id="submitBtn" class="bg-green-500 text-white px-6 py-2 rounded hidden">Submit Quiz</button>
+    </div>
+
+    <!-- Result -->
+    <div id="result" class="mt-6 text-center text-xl font-semibold"></div>
+  </div>
+
+<script>
+let quizData = [];
+let currentQuestion = 0;
+let answers = {};
+
+const quizContainer = document.getElementById("quizContainer");
+const examSelect = document.getElementById("examSelect");
+const loadBtn = document.getElementById("loadBtn");
+const prevBtn = document.getElementById("prevBtn");
+const nextBtn = document.getElementById("nextBtn");
+const submitBtn = document.getElementById("submitBtn");
+const navButtons = document.getElementById("navButtons");
+const resultDiv = document.getElementById("result");
+
+loadBtn.addEventListener("click", () => {
+  const exam = examSelect.value;
+  fetch(`/get-quiz/${exam}`)
+    .then(res => res.json())
+    .then(data => {
+      quizData = data;
+      currentQuestion = 0;
+      answers = {};
+      resultDiv.innerText = "";
+      renderQuestion();
+      navButtons.classList.remove("hidden");
+      submitBtn.classList.remove("hidden");
+    });
+});
+
+function renderQuestion() {
+  const q = quizData[currentQuestion];
+  let html = `<div class="p-4 border rounded mb-4">
+                <p class="font-semibold text-lg">Q${currentQuestion+1}. ${q.question}</p>`;
+  q.options.forEach(option => {
+    const checked = answers[currentQuestion] === option ? "checked" : "";
+    html += `<label class="block mt-2">
+              <input type="radio" name="q${currentQuestion}" value="${option}" ${checked}>
+              ${option}
+             </label>`;
+  });
+  html += `</div>`;
+  quizContainer.innerHTML = html;
+}
+
+prevBtn.addEventListener("click", () => {
+  saveAnswer();
+  if (currentQuestion > 0) {
+    currentQuestion--;
+    renderQuestion();
+  }
+});
+
+nextBtn.addEventListener("click", () => {
+  saveAnswer();
+  if (currentQuestion < quizData.length - 1) {
+    currentQuestion++;
+    renderQuestion();
+  }
+});
+
+function saveAnswer() {
+  const selected = document.querySelector(`input[name='q${currentQuestion}']:checked`);
+  answers[currentQuestion] = selected ? selected.value : "";
+}
+
+submitBtn.addEventListener("click", () => {
+  saveAnswer();
+  const exam = examSelect.value;
+  fetch(`/submit/${exam}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(answers)
+  })
+  .then(res => res.json())
+  .then(data => {
+    resultDiv.innerText = `Your Score: ${data.score} / ${data.total}`;
+  });
+});
+</script>
 </body>
 </html>
