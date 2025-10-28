@@ -65,6 +65,7 @@
 </div>
 
 <script>
+// JS code (same as previous step)
 let quizData = [], currentQuestion = 0, answers = {}, bookmarks = [];
 const examSelect = document.getElementById("examSelect");
 const subtopicSelect = document.getElementById("subtopicSelect");
@@ -76,7 +77,6 @@ const submitBtn = document.getElementById("submitBtn");
 const bookmarkBtn = document.getElementById("bookmarkBtn");
 const navButtons = document.getElementById("navButtons");
 const progressBar = document.getElementById("progressBar");
-const resultDiv = document.getElementById("result");
 
 // Load subtopics
 function loadSubtopics() {
@@ -101,7 +101,6 @@ loadBtn.addEventListener("click", () => {
     .then(data => {
       quizData = data;
       currentQuestion = 0; answers = {}; bookmarks = [];
-      resultDiv.innerText = "";
       renderQuestion();
       navButtons.classList.remove("hidden");
       submitBtn.classList.remove("hidden");
@@ -208,6 +207,7 @@ function renderTopicChart(incorrectQuestions){
 // TTS
 function speakQuestion(text){ if('speechSynthesis' in window){ const msg=new SpeechSynthesisUtterance(text); window.speechSynthesis.speak(msg);}}
 </script>
+
 </div>
 </body>
 </html>
