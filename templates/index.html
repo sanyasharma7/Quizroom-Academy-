@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Quizroom Academy</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>Quizroom Academy</h1>
+    <div id="quiz"></div>
+    <button id="submitBtn">Submit</button>
+    <div id="result"></div>
+
+    <script>
+        let quizData = [];
+        fetch("/get-quiz")
+            .then(res => res.json())
+            .then(data => {
+                quizData = data;
+                const quizDiv = document.getElementById("quiz");
+                data.forEach((q, index) => {
+                    let html = `<div class="question"><p>${q.question}</p>`;
+                    q.options.forEach(option => {
+                        html += `<label><input type="radio" name="${index}" value="${option}">${option}</label><br>`;
+                    });
+                    html += `</div>`;
+                    quizDiv.innerHTML += html;
+                });
+            });
+
+        document.getElementById("submitBtn").addEventListener("click", () => {
+            const answers = {};
+            quizData.forEach((q, i) => {
+                const selected = document.querySelector(`input[name='${i}']:checked`);
+                answers[i] = selected ? selected.value : "";
+            });
+
+            fetch("/submit", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(answers)
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById("result").innerText = `Score: ${data.score}/${data.total}`;
+            });
+        });
+    </script>
+</body>
+</html>
