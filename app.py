@@ -1,12 +1,11 @@
-# app.py
 from flask import Flask, render_template, jsonify, request
 import json, os
 import openai
 
 app = Flask(__name__)
-openai.api_key = os.getenv("OPENAI_API_KEY")  # Add in Render environment
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
-# Load quiz
+# Load quiz dynamically
 def load_quiz(exam, subtopic):
     path = os.path.join("quizzes", exam, f"{subtopic}.json")
     if os.path.exists(path):
@@ -74,3 +73,6 @@ Generate a friendly, actionable summary for the student.
         return response['choices'][0]['message']['content']
     except:
         return "Could not generate AI summary."
+
+if __name__ == "__main__":
+    app.run(debug=True)
