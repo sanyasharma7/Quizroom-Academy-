@@ -1,47 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Quizroom Academy</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+<meta charset="UTF-8">
+<title>Quizroom Academy</title>
+<script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 p-6 font-sans">
-  <div class="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow-lg">
-    <h1 class="text-3xl font-bold text-center mb-6">Quizroom Academy</h1>
+<div class="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow-lg">
+<h1 class="text-3xl font-bold text-center mb-6">Quizroom Academy</h1>
 
-    <!-- Exam Selection -->
-    <div class="mb-4 text-center">
-      <label class="mr-2 font-semibold">Select Exam:</label>
-      <select id="examSelect" class="border rounded px-2 py-1">
-        <option value="upsc">UPSC</option>
-        <option value="neet_pg">NEET PG</option>
-        <option value="ssc">SSC</option>
-      </select>
-      <button id="loadBtn" class="bg-blue-500 text-white px-4 py-1 rounded ml-2">Load Quiz</button>
-    </div>
+<!-- Exam Selection -->
+<div class="mb-4 text-center">
+  <label class="mr-2 font-semibold">Select Exam:</label>
+  <select id="examSelect" class="border rounded px-2 py-1">
+    <option value="upsc">UPSC</option>
+    <option value="neet_pg">NEET PG</option>
+    <option value="ssc">SSC</option>
+  </select>
+  <button id="loadBtn" class="bg-blue-500 text-white px-4 py-1 rounded ml-2">Load Quiz</button>
+</div>
 
-    <!-- Quiz Container -->
-    <div id="quizContainer" class="mt-6"></div>
-
-    <!-- Navigation Buttons -->
-    <div id="navButtons" class="mt-4 flex justify-between hidden">
-      <button id="prevBtn" class="bg-gray-300 px-4 py-1 rounded">Previous</button>
-      <button id="nextBtn" class="bg-gray-300 px-4 py-1 rounded">Next</button>
-    </div>
-
-    <!-- Submit Button -->
-    <div class="mt-4 text-center">
-      <button id="submitBtn" class="bg-green-500 text-white px-6 py-2 rounded hidden">Submit Quiz</button>
-    </div>
-
-    <!-- Result -->
-    <div id="result" class="mt-6 text-center text-xl font-semibold"></div>
+<!-- Progress Bar -->
+<div class="mb-4">
+  <div class="w-full bg-gray-200 rounded h-4">
+    <div id="progressBar" class="bg-green-500 h-4 rounded w-0"></div>
   </div>
+</div>
+
+<!-- Quiz Container -->
+<div id="quizContainer" class="mt-6"></div>
+
+<!-- Navigation Buttons -->
+<div id="navButtons" class="mt-4 flex justify-between hidden">
+  <button id="prevBtn" class="bg-gray-300 px-4 py-1 rounded">Previous</button>
+  <button id="nextBtn" class="bg-gray-300 px-4 py-1 rounded">Next</button>
+</div>
+
+<!-- Bookmark Button -->
+<div class="mt-2 text-center">
+  <button id="bookmarkBtn" class="bg-yellow-400 px-4 py-1 rounded hidden">Bookmark</button>
+</div>
+
+<!-- Submit Button -->
+<div class="mt-4 text-center">
+  <button id="submitBtn" class="bg-green-500 text-white px-6 py-2 rounded hidden">Submit Quiz</button>
+</div>
+
+<!-- Result -->
+<div id="result" class="mt-6 text-center text-xl font-semibold"></div>
+</div>
 
 <script>
 let quizData = [];
 let currentQuestion = 0;
 let answers = {};
+let bookmarks = [];
 
 const quizContainer = document.getElementById("quizContainer");
 const examSelect = document.getElementById("examSelect");
@@ -49,8 +62,10 @@ const loadBtn = document.getElementById("loadBtn");
 const prevBtn = document.getElementById("prevBtn");
 const nextBtn = document.getElementById("nextBtn");
 const submitBtn = document.getElementById("submitBtn");
+const bookmarkBtn = document.getElementById("bookmarkBtn");
 const navButtons = document.getElementById("navButtons");
 const resultDiv = document.getElementById("result");
+const progressBar = document.getElementById("progressBar");
 
 loadBtn.addEventListener("click", () => {
   const exam = examSelect.value;
@@ -60,10 +75,13 @@ loadBtn.addEventListener("click", () => {
       quizData = data;
       currentQuestion = 0;
       answers = {};
+      bookmarks = [];
       resultDiv.innerText = "";
       renderQuestion();
       navButtons.classList.remove("hidden");
       submitBtn.classList.remove("hidden");
+      bookmarkBtn.classList.remove("hidden");
+      updateProgressBar();
     });
 });
 
@@ -80,6 +98,14 @@ function renderQuestion() {
   });
   html += `</div>`;
   quizContainer.innerHTML = html;
+  speakQuestion(q.question);
+  highlightBookmark();
+}
+
+function saveAnswer() {
+  const selected = document.querySelector(`input[name='q${currentQuestion}']:checked`);
+  answers[currentQuestion] = selected ? selected.value : "";
+  updateProgressBar();
 }
 
 prevBtn.addEventListener("click", () => {
@@ -98,11 +124,6 @@ nextBtn.addEventListener("click", () => {
   }
 });
 
-function saveAnswer() {
-  const selected = document.querySelector(`input[name='q${currentQuestion}']:checked`);
-  answers[currentQuestion] = selected ? selected.value : "";
-}
-
 submitBtn.addEventListener("click", () => {
   saveAnswer();
   const exam = examSelect.value;
@@ -113,9 +134,43 @@ submitBtn.addEventListener("click", () => {
   })
   .then(res => res.json())
   .then(data => {
-    resultDiv.innerText = `Your Score: ${data.score} / ${data.total}`;
+    let summary = `Your Score: ${data.score} / ${data.total}\n\n`;
+    summary += "Incorrect Questions:\n";
+    quizData.forEach((q, i) => {
+      if (answers[i] !== q.answer) summary += `Q${i+1}: ${q.question} (Correct: ${q.answer})\n`;
+    });
+    resultDiv.innerText = summary;
   });
 });
+
+// Progress Bar
+function updateProgressBar() {
+  let answeredCount = Object.keys(answers).length;
+  let percent = (answeredCount / quizData.length) * 100;
+  progressBar.style.width = percent + "%";
+}
+
+// Bookmark feature
+bookmarkBtn.addEventListener("click", () => {
+  if (!bookmarks.includes(currentQuestion)) bookmarks.push(currentQuestion);
+  highlightBookmark();
+});
+
+function highlightBookmark() {
+  if (bookmarks.includes(currentQuestion)) {
+    bookmarkBtn.classList.add("bg-yellow-600");
+  } else {
+    bookmarkBtn.classList.remove("bg-yellow-600");
+  }
+}
+
+// AI TTS using Web Speech API
+function speakQuestion(text) {
+  if ('speechSynthesis' in window) {
+    const msg = new SpeechSynthesisUtterance(text);
+    window.speechSynthesis.speak(msg);
+  }
+}
 </script>
 </body>
 </html>
