@@ -6,76 +6,87 @@
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 p-6 font-sans">
-<div class="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow-lg">
-  <h1 class="text-3xl font-bold text-center mb-6">Quizroom Academy</h1>
+<div class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-lg">
 
-  <!-- Exam Selection -->
-  <div class="mb-4 text-center">
-    <label class="mr-2 font-semibold">Select Exam:</label>
-    <select id="examSelect" class="border rounded px-2 py-1">
-      <option value="upsc">UPSC</option>
-      <option value="neet_pg">NEET PG</option>
-      <option value="ssc">SSC</option>
-    </select>
-    <button id="loadBtn" class="bg-blue-500 text-white px-4 py-1 rounded ml-2">Load Quiz</button>
-  </div>
+<h1 class="text-3xl font-bold text-center mb-6">Quizroom Academy</h1>
 
-  <!-- Progress Bar -->
-  <div class="mb-4">
-    <div class="w-full bg-gray-200 rounded h-4">
-      <div id="progressBar" class="bg-green-500 h-4 rounded w-0"></div>
-    </div>
-  </div>
+<!-- Exam & Subtopic Selection -->
+<div class="mb-4 text-center">
+  <label class="mr-2 font-semibold">Select Exam:</label>
+  <select id="examSelect" class="border rounded px-2 py-1">
+    <option value="upsc">UPSC</option>
+    <option value="neet_pg">NEET PG</option>
+    <option value="ssc">SSC</option>
+  </select>
 
-  <!-- Quiz Container -->
-  <div id="quizContainer" class="mt-6"></div>
+  <label class="ml-4 mr-2 font-semibold">Select Year / Topic:</label>
+  <select id="subtopicSelect" class="border rounded px-2 py-1"></select>
 
-  <!-- Navigation Buttons -->
-  <div id="navButtons" class="mt-4 flex justify-between hidden">
-    <button id="prevBtn" class="bg-gray-300 px-4 py-1 rounded">Previous</button>
-    <button id="nextBtn" class="bg-gray-300 px-4 py-1 rounded">Next</button>
-  </div>
-
-  <!-- Bookmark Button -->
-  <div class="mt-2 text-center">
-    <button id="bookmarkBtn" class="bg-yellow-400 px-4 py-1 rounded hidden">Bookmark</button>
-  </div>
-
-  <!-- Submit Button -->
-  <div class="mt-4 text-center">
-    <button id="submitBtn" class="bg-green-500 text-white px-6 py-2 rounded hidden">Submit Quiz</button>
-  </div>
-
-  <!-- Result / AI Summary -->
-  <div id="result" class="mt-6 text-center text-xl font-semibold whitespace-pre-line"></div>
+  <button id="loadBtn" class="bg-blue-500 text-white px-4 py-1 rounded ml-2">Load Quiz</button>
 </div>
 
-<script>
-let quizData = [];
-let currentQuestion = 0;
-let answers = {};
-let bookmarks = [];
+<!-- Progress Bar -->
+<div class="mb-4 w-full bg-gray-200 h-4 rounded">
+  <div id="progressBar" class="h-4 bg-green-500 rounded w-0"></div>
+</div>
 
-const quizContainer = document.getElementById("quizContainer");
+<!-- Quiz Container -->
+<div id="quizContainer" class="mt-6 grid gap-4"></div>
+
+<!-- Navigation + Bookmark -->
+<div class="mt-4 flex justify-between hidden" id="navButtons">
+  <button id="prevBtn" class="bg-gray-300 px-4 py-1 rounded">Previous</button>
+  <button id="nextBtn" class="bg-gray-300 px-4 py-1 rounded">Next</button>
+</div>
+
+<div class="mt-2 text-center">
+  <button id="bookmarkBtn" class="bg-yellow-400 px-4 py-1 rounded hidden">Bookmark</button>
+</div>
+
+<div class="mt-4 text-center">
+  <button id="submitBtn" class="bg-green-500 text-white px-6 py-2 rounded hidden">Submit Quiz</button>
+</div>
+
+<div id="result" class="mt-6 text-center text-xl font-semibold"></div>
+
+<script>
+let quizData = [], currentQuestion = 0, answers = {}, bookmarks = [];
+
 const examSelect = document.getElementById("examSelect");
+const subtopicSelect = document.getElementById("subtopicSelect");
+const quizContainer = document.getElementById("quizContainer");
 const loadBtn = document.getElementById("loadBtn");
 const prevBtn = document.getElementById("prevBtn");
 const nextBtn = document.getElementById("nextBtn");
 const submitBtn = document.getElementById("submitBtn");
 const bookmarkBtn = document.getElementById("bookmarkBtn");
 const navButtons = document.getElementById("navButtons");
-const resultDiv = document.getElementById("result");
 const progressBar = document.getElementById("progressBar");
+const resultDiv = document.getElementById("result");
 
+// Load subtopics dynamically
+function loadSubtopics() {
+  fetch(`/get_subtopics/${examSelect.value}`)
+    .then(res => res.json())
+    .then(data => {
+      subtopicSelect.innerHTML = "";
+      data.forEach(s => {
+        const opt = document.createElement("option");
+        opt.value = s; opt.innerText = s;
+        subtopicSelect.appendChild(opt);
+      });
+    });
+}
+examSelect.addEventListener("change", loadSubtopics);
+window.onload = loadSubtopics;
+
+// Load Quiz
 loadBtn.addEventListener("click", () => {
-  const exam = examSelect.value;
-  fetch(`/get-quiz/${exam}`)
+  fetch(`/get-quiz/${examSelect.value}/${subtopicSelect.value}`)
     .then(res => res.json())
     .then(data => {
       quizData = data;
-      currentQuestion = 0;
-      answers = {};
-      bookmarks = [];
+      currentQuestion = 0; answers = {}; bookmarks = [];
       resultDiv.innerText = "";
       renderQuestion();
       navButtons.classList.remove("hidden");
@@ -85,15 +96,18 @@ loadBtn.addEventListener("click", () => {
     });
 });
 
+// Render question
 function renderQuestion() {
   const q = quizData[currentQuestion];
-  let html = `<div class="p-4 border rounded mb-4">
-                <p class="font-semibold text-lg">Q${currentQuestion+1}. ${q.question}</p>`;
+  let html = `<div class="p-4 border rounded shadow-lg bg-white">
+                <div class="flex justify-between items-center">
+                  <p class="font-semibold text-lg">Q${currentQuestion+1}: ${q.question}</p>
+                  <span class="px-2 py-1 rounded bg-blue-100 text-blue-800">${bookmarks.includes(currentQuestion) ? "Bookmarked" : ""}</span>
+                </div>`;
   q.options.forEach(option => {
     const checked = answers[currentQuestion] === option ? "checked" : "";
-    html += `<label class="block mt-2">
-              <input type="radio" name="q${currentQuestion}" value="${option}" ${checked}>
-              ${option}
+    html += `<label class="block mt-2 p-2 border rounded cursor-pointer hover:bg-gray-100 ${answers[currentQuestion]===option?'bg-blue-50 border-blue-400':''}">
+              <input type="radio" name="q${currentQuestion}" value="${option}" ${checked} class="mr-2">${option}
              </label>`;
   });
   html += `</div>`;
@@ -102,53 +116,35 @@ function renderQuestion() {
   highlightBookmark();
 }
 
-function saveAnswer() {
-  const selected = document.querySelector(`input[name='q${currentQuestion}']:checked`);
-  answers[currentQuestion] = selected ? selected.value : "";
-  updateProgressBar();
-}
+// Navigation
+prevBtn.addEventListener("click", () => { saveAnswer(); if(currentQuestion>0){currentQuestion--; renderQuestion();}});
+nextBtn.addEventListener("click", () => { saveAnswer(); if(currentQuestion<quizData.length-1){currentQuestion++; renderQuestion();}});
+function saveAnswer(){ const selected=document.querySelector(`input[name='q${currentQuestion}']:checked`); answers[currentQuestion]=selected?selected.value:""; updateProgressBar();}
 
-prevBtn.addEventListener("click", () => {
-  saveAnswer();
-  if (currentQuestion > 0) {
-    currentQuestion--;
-    renderQuestion();
-  }
-});
+// Progress
+function updateProgressBar(){ let percent = (Object.keys(answers).length / quizData.length) * 100; progressBar.style.width = percent+"%";}
 
-nextBtn.addEventListener("click", () => {
-  saveAnswer();
-  if (currentQuestion < quizData.length - 1) {
-    currentQuestion++;
-    renderQuestion();
-  }
-});
+// Bookmark
+bookmarkBtn.addEventListener("click", ()=>{ if(!bookmarks.includes(currentQuestion)) bookmarks.push(currentQuestion); highlightBookmark();});
+function highlightBookmark(){ if(bookmarks.includes(currentQuestion)) bookmarkBtn.classList.add("bg-yellow-600"); else bookmarkBtn.classList.remove("bg-yellow-600");}
 
-submitBtn.addEventListener("click", () => {
+// Submit
+submitBtn.addEventListener("click",()=>{
   saveAnswer();
-  const exam = examSelect.value;
-  fetch(`/submit/${exam}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(answers)
-  })
-  .then(res => res.json())
-  .then(data => {
-    // Build result string with AI summary
+  fetch(`/submit/${examSelect.value}/${subtopicSelect.value}`, {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify(answers)
+  }).then(res=>res.json()).then(data=>{
     let summary = `Your Score: ${data.score} / ${data.total}\n\n`;
-    
-    if (data.incorrect_questions.length > 0) {
-      summary += "Incorrect Questions:\n";
-      data.incorrect_questions.forEach((q, i) => {
-        summary += `Q${i+1}: ${q.question} (Correct: ${q.correct})\n`;
-      });
-    }
-
-    summary += `\nAI Summary & Recommendations:\n${data.ai_summary}`;
-    
+    if(data.incorrect_questions.length>0){summary+="Incorrect Questions:\n"; data.incorrect_questions.forEach((q,i)=>{summary+=`Q${i+1}: ${q.question} | Correct: ${q.correct}\n`;});}
+    summary+=`\nAI Summary & Recommendations:\n${data.ai_summary}`;
     resultDiv.innerText = summary;
   });
 });
 
-// Progress Bar
-function updateProgressBar() {
+// TTS
+function speakQuestion(text){ if('speechSynthesis' in window){ const msg=new SpeechSynthesisUtterance(text); window.speechSynthesis.speak(msg);}}
+</script>
+</body>
+</html>
