@@ -4,13 +4,15 @@
 <meta charset="UTF-8">
 <title>Quizroom Academy</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-gray-50 p-6 font-sans">
+
 <div class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-lg">
 
 <h1 class="text-3xl font-bold text-center mb-6">Quizroom Academy</h1>
 
-<!-- Exam & Subtopic Selection -->
+<!-- Exam & Subtopic -->
 <div class="mb-4 text-center">
   <label class="mr-2 font-semibold">Select Exam:</label>
   <select id="examSelect" class="border rounded px-2 py-1">
@@ -23,6 +25,11 @@
   <select id="subtopicSelect" class="border rounded px-2 py-1"></select>
 
   <button id="loadBtn" class="bg-blue-500 text-white px-4 py-1 rounded ml-2">Load Quiz</button>
+</div>
+
+<!-- Floating Score -->
+<div id="liveScore" class="fixed top-4 right-4 bg-blue-500 text-white px-4 py-2 rounded-full shadow-lg">
+  Score: 0
 </div>
 
 <!-- Progress Bar -->
@@ -38,20 +45,27 @@
   <button id="prevBtn" class="bg-gray-300 px-4 py-1 rounded">Previous</button>
   <button id="nextBtn" class="bg-gray-300 px-4 py-1 rounded">Next</button>
 </div>
-
 <div class="mt-2 text-center">
   <button id="bookmarkBtn" class="bg-yellow-400 px-4 py-1 rounded hidden">Bookmark</button>
 </div>
-
 <div class="mt-4 text-center">
   <button id="submitBtn" class="bg-green-500 text-white px-6 py-2 rounded hidden">Submit Quiz</button>
 </div>
 
-<div id="result" class="mt-6 text-center text-xl font-semibold"></div>
+<!-- Topic Chart -->
+<div id="topicChartContainer" class="mt-6 p-4 bg-white shadow-lg rounded-lg" style="display:none;">
+  <h2 class="text-xl font-bold mb-2">Topic-wise Performance</h2>
+  <canvas id="topicChart"></canvas>
+</div>
+
+<!-- AI Summary -->
+<div id="aiSummaryCard" class="mt-6 p-4 bg-green-50 border-l-4 border-green-500 rounded-lg shadow-lg" style="display:none;">
+  <h2 class="font-bold text-lg mb-2">AI Study Recommendations</h2>
+  <p id="aiSummaryText"></p>
+</div>
 
 <script>
 let quizData = [], currentQuestion = 0, answers = {}, bookmarks = [];
-
 const examSelect = document.getElementById("examSelect");
 const subtopicSelect = document.getElementById("subtopicSelect");
 const quizContainer = document.getElementById("quizContainer");
@@ -64,7 +78,7 @@ const navButtons = document.getElementById("navButtons");
 const progressBar = document.getElementById("progressBar");
 const resultDiv = document.getElementById("result");
 
-// Load subtopics dynamically
+// Load subtopics
 function loadSubtopics() {
   fetch(`/get_subtopics/${examSelect.value}`)
     .then(res => res.json())
@@ -93,6 +107,7 @@ loadBtn.addEventListener("click", () => {
       submitBtn.classList.remove("hidden");
       bookmarkBtn.classList.remove("hidden");
       updateProgressBar();
+      updateLiveScore();
     });
 });
 
@@ -119,10 +134,19 @@ function renderQuestion() {
 // Navigation
 prevBtn.addEventListener("click", () => { saveAnswer(); if(currentQuestion>0){currentQuestion--; renderQuestion();}});
 nextBtn.addEventListener("click", () => { saveAnswer(); if(currentQuestion<quizData.length-1){currentQuestion++; renderQuestion();}});
-function saveAnswer(){ const selected=document.querySelector(`input[name='q${currentQuestion}']:checked`); answers[currentQuestion]=selected?selected.value:""; updateProgressBar();}
+function saveAnswer(){ const selected=document.querySelector(`input[name='q${currentQuestion}']:checked`); answers[currentQuestion]=selected?selected.value:""; updateProgressBar(); updateLiveScore();}
 
 // Progress
 function updateProgressBar(){ let percent = (Object.keys(answers).length / quizData.length) * 100; progressBar.style.width = percent+"%";}
+
+// Live Score
+function updateLiveScore(){
+  let score = 0;
+  for(let i=0;i<quizData.length;i++){
+    if(answers[i]===quizData[i].answer) score++;
+  }
+  document.getElementById("liveScore").innerText = `Score: ${score} / ${quizData.length}`;
+}
 
 // Bookmark
 bookmarkBtn.addEventListener("click", ()=>{ if(!bookmarks.includes(currentQuestion)) bookmarks.push(currentQuestion); highlightBookmark();});
@@ -136,15 +160,54 @@ submitBtn.addEventListener("click",()=>{
     headers:{"Content-Type":"application/json"},
     body:JSON.stringify(answers)
   }).then(res=>res.json()).then(data=>{
-    let summary = `Your Score: ${data.score} / ${data.total}\n\n`;
-    if(data.incorrect_questions.length>0){summary+="Incorrect Questions:\n"; data.incorrect_questions.forEach((q,i)=>{summary+=`Q${i+1}: ${q.question} | Correct: ${q.correct}\n`;});}
-    summary+=`\nAI Summary & Recommendations:\n${data.ai_summary}`;
-    resultDiv.innerText = summary;
+    renderResultCards();
+    renderTopicChart(data.incorrect_questions);
+    document.getElementById("aiSummaryText").innerText = data.ai_summary;
+    document.getElementById("aiSummaryCard").style.display="block";
   });
 });
+
+// Render Result Cards
+function renderResultCards(){
+  quizContainer.innerHTML="";
+  quizData.forEach((q,i)=>{
+    let color = answers[i]===q.answer ? "bg-green-100 border-green-400" : "bg-red-100 border-red-400";
+    quizContainer.innerHTML += `
+      <div class="p-4 border-l-4 ${color} rounded shadow-lg mb-2">
+        <p class="font-semibold">Q${i+1}: ${q.question}</p>
+        <p>Your Answer: ${answers[i] || "Not Answered"}</p>
+        <p>Correct Answer: ${q.answer}</p>
+      </div>`;
+  });
+}
+
+// Topic Chart
+function renderTopicChart(incorrectQuestions){
+  const topicCounts={};
+  quizData.forEach((q,i)=>{
+    let topic=subtopicSelect.value;
+    if(!topicCounts[topic]) topicCounts[topic]=0;
+    if(answers[i]!==q.answer) topicCounts[topic]++;
+  });
+  const ctx=document.getElementById("topicChart").getContext("2d");
+  new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:Object.keys(topicCounts),
+      datasets:[{
+        label:'Incorrect Questions per Topic',
+        data:Object.values(topicCounts),
+        backgroundColor:'rgba(255,99,132,0.6)'
+      }]
+    },
+    options:{responsive:true, plugins:{legend:{display:false}}}
+  });
+  document.getElementById("topicChartContainer").style.display="block";
+}
 
 // TTS
 function speakQuestion(text){ if('speechSynthesis' in window){ const msg=new SpeechSynthesisUtterance(text); window.speechSynthesis.speak(msg);}}
 </script>
+</div>
 </body>
 </html>
