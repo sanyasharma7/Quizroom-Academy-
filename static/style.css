@@ -15,3 +15,19 @@ button {
     padding: 10px 20px;
     font-size: 16px;
 }
+
+/* Hover card scale */
+.card:hover {
+    transform: scale(1.03);
+    transition: all 0.3s ease;
+}
+
+/* Badge animations */
+.badge {
+    animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
