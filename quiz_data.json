@@ -1,0 +1,12 @@
+[
+  {
+    "question": "What is the capital of India?",
+    "options": ["New Delhi", "Mumbai", "Kolkata", "Chennai"],
+    "answer": "New Delhi"
+  },
+  {
+    "question": "Which planet is known as the Red Planet?",
+    "options": ["Earth", "Mars", "Jupiter", "Venus"],
+    "answer": "Mars"
+  }
+]
