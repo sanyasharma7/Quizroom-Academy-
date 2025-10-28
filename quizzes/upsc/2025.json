@@ -1,4 +1,7 @@
 [
   {"question":"Capital of India?","options":["New Delhi","Mumbai","Kolkata","Chennai"],"answer":"New Delhi"},
-  {"question":"Red Planet?","options":["Earth","Mars","Jupiter","Venus"],"answer":"Mars"}
+  {"question":"Red Planet in the solar system?","options":["Earth","Mars","Jupiter","Venus"],"answer":"Mars"},
+  {"question":"President of India in 2025?","options":["Ram Nath Kovind","Droupadi Murmu","Pranab Mukherjee","A.P.J. Abdul Kalam"],"answer":"Droupadi Murmu"},
+  {"question":"Who is the current Chief Justice of India (2025)?","options":["NV Ramana","DY Chandrachud","Ranjan Gogoi","Sharad Arvind Bobde"],"answer":"DY Chandrachud"},
+  {"question":"Which river is known as 'Sorrow of Bihar'?","options":["Ganga","Kosi","Brahmaputra","Yamuna"],"answer":"Kosi"}
 ]
