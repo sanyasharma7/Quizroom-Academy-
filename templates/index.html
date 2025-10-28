@@ -7,47 +7,47 @@
 </head>
 <body class="bg-gray-50 p-6 font-sans">
 <div class="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow-lg">
-<h1 class="text-3xl font-bold text-center mb-6">Quizroom Academy</h1>
+  <h1 class="text-3xl font-bold text-center mb-6">Quizroom Academy</h1>
 
-<!-- Exam Selection -->
-<div class="mb-4 text-center">
-  <label class="mr-2 font-semibold">Select Exam:</label>
-  <select id="examSelect" class="border rounded px-2 py-1">
-    <option value="upsc">UPSC</option>
-    <option value="neet_pg">NEET PG</option>
-    <option value="ssc">SSC</option>
-  </select>
-  <button id="loadBtn" class="bg-blue-500 text-white px-4 py-1 rounded ml-2">Load Quiz</button>
-</div>
-
-<!-- Progress Bar -->
-<div class="mb-4">
-  <div class="w-full bg-gray-200 rounded h-4">
-    <div id="progressBar" class="bg-green-500 h-4 rounded w-0"></div>
+  <!-- Exam Selection -->
+  <div class="mb-4 text-center">
+    <label class="mr-2 font-semibold">Select Exam:</label>
+    <select id="examSelect" class="border rounded px-2 py-1">
+      <option value="upsc">UPSC</option>
+      <option value="neet_pg">NEET PG</option>
+      <option value="ssc">SSC</option>
+    </select>
+    <button id="loadBtn" class="bg-blue-500 text-white px-4 py-1 rounded ml-2">Load Quiz</button>
   </div>
-</div>
 
-<!-- Quiz Container -->
-<div id="quizContainer" class="mt-6"></div>
+  <!-- Progress Bar -->
+  <div class="mb-4">
+    <div class="w-full bg-gray-200 rounded h-4">
+      <div id="progressBar" class="bg-green-500 h-4 rounded w-0"></div>
+    </div>
+  </div>
 
-<!-- Navigation Buttons -->
-<div id="navButtons" class="mt-4 flex justify-between hidden">
-  <button id="prevBtn" class="bg-gray-300 px-4 py-1 rounded">Previous</button>
-  <button id="nextBtn" class="bg-gray-300 px-4 py-1 rounded">Next</button>
-</div>
+  <!-- Quiz Container -->
+  <div id="quizContainer" class="mt-6"></div>
 
-<!-- Bookmark Button -->
-<div class="mt-2 text-center">
-  <button id="bookmarkBtn" class="bg-yellow-400 px-4 py-1 rounded hidden">Bookmark</button>
-</div>
+  <!-- Navigation Buttons -->
+  <div id="navButtons" class="mt-4 flex justify-between hidden">
+    <button id="prevBtn" class="bg-gray-300 px-4 py-1 rounded">Previous</button>
+    <button id="nextBtn" class="bg-gray-300 px-4 py-1 rounded">Next</button>
+  </div>
 
-<!-- Submit Button -->
-<div class="mt-4 text-center">
-  <button id="submitBtn" class="bg-green-500 text-white px-6 py-2 rounded hidden">Submit Quiz</button>
-</div>
+  <!-- Bookmark Button -->
+  <div class="mt-2 text-center">
+    <button id="bookmarkBtn" class="bg-yellow-400 px-4 py-1 rounded hidden">Bookmark</button>
+  </div>
 
-<!-- Result -->
-<div id="result" class="mt-6 text-center text-xl font-semibold"></div>
+  <!-- Submit Button -->
+  <div class="mt-4 text-center">
+    <button id="submitBtn" class="bg-green-500 text-white px-6 py-2 rounded hidden">Submit Quiz</button>
+  </div>
+
+  <!-- Result / AI Summary -->
+  <div id="result" class="mt-6 text-center text-xl font-semibold whitespace-pre-line"></div>
 </div>
 
 <script>
@@ -134,43 +134,21 @@ submitBtn.addEventListener("click", () => {
   })
   .then(res => res.json())
   .then(data => {
+    // Build result string with AI summary
     let summary = `Your Score: ${data.score} / ${data.total}\n\n`;
-    summary += "Incorrect Questions:\n";
-    quizData.forEach((q, i) => {
-      if (answers[i] !== q.answer) summary += `Q${i+1}: ${q.question} (Correct: ${q.answer})\n`;
-    });
+    
+    if (data.incorrect_questions.length > 0) {
+      summary += "Incorrect Questions:\n";
+      data.incorrect_questions.forEach((q, i) => {
+        summary += `Q${i+1}: ${q.question} (Correct: ${q.correct})\n`;
+      });
+    }
+
+    summary += `\nAI Summary & Recommendations:\n${data.ai_summary}`;
+    
     resultDiv.innerText = summary;
   });
 });
 
 // Progress Bar
 function updateProgressBar() {
-  let answeredCount = Object.keys(answers).length;
-  let percent = (answeredCount / quizData.length) * 100;
-  progressBar.style.width = percent + "%";
-}
-
-// Bookmark feature
-bookmarkBtn.addEventListener("click", () => {
-  if (!bookmarks.includes(currentQuestion)) bookmarks.push(currentQuestion);
-  highlightBookmark();
-});
-
-function highlightBookmark() {
-  if (bookmarks.includes(currentQuestion)) {
-    bookmarkBtn.classList.add("bg-yellow-600");
-  } else {
-    bookmarkBtn.classList.remove("bg-yellow-600");
-  }
-}
-
-// AI TTS using Web Speech API
-function speakQuestion(text) {
-  if ('speechSynthesis' in window) {
-    const msg = new SpeechSynthesisUtterance(text);
-    window.speechSynthesis.speak(msg);
-  }
-}
-</script>
-</body>
-</html>
