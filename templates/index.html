@@ -7,9 +7,6 @@
 <!-- Tailwind -->
 <script src="https://cdn.tailwindcss.com"></script>
 
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <!-- Google Font -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
@@ -72,18 +69,6 @@ tailwind.config = { darkMode: 'class' }
 <!-- Submit Button -->
 <div class="mt-4 text-center">
   <button id="submitBtn" class="bg-green-500 text-white px-6 py-2 rounded hidden hover:bg-green-600">Submit Quiz</button>
-</div>
-
-<!-- Chart -->
-<div id="topicChartContainer" class="mt-6 p-4 bg-white dark:bg-gray-800 shadow-lg rounded-lg hidden">
-  <h2 class="text-xl font-bold mb-2 text-gray-700 dark:text-gray-300">Topic-wise Performance</h2>
-  <canvas id="topicChart"></canvas>
-</div>
-
-<!-- AI Summary -->
-<div id="aiSummaryCard" class="mt-6 p-4 bg-green-50 dark:bg-green-900 border-l-4 border-green-500 rounded-lg shadow-lg hidden">
-  <h2 class="font-bold text-lg mb-2 text-green-700 dark:text-green-300">AI Study Recommendations</h2>
-  <p id="aiSummaryText"></p>
 </div>
 
 <script>
@@ -188,9 +173,6 @@ submitBtn.onclick = ()=>{
     body:JSON.stringify(answers)
   }).then(r=>r.json()).then(data=>{
     showResults();
-    drawChart(data.incorrect_questions);
-    aiSummaryText.textContent=data.ai_summary;
-    aiSummaryCard.classList.remove("hidden");
   });
 };
 
@@ -206,28 +188,6 @@ function showResults(){
         <p>Correct Answer: ${q.answer}</p>
       </div>`;
   });
-}
-
-// Chart
-function drawChart(incorrect){
-  const ctx=document.getElementById("topicChart").getContext("2d");
-  new Chart(ctx,{
-    type:'bar',
-    data:{
-      labels:[subtopicSelect.value],
-      datasets:[{
-        label:'Incorrect Questions',
-        data:[incorrect.length],
-        backgroundColor:['rgba(75, 192, 192, 0.7)'],
-        borderRadius:10
-      }]
-    },
-    options:{
-      responsive:true,
-      scales:{ y:{ beginAtZero:true, grid:{display:true}}, x:{grid:{display:false}} }
-    }
-  });
-  topicChartContainer.classList.remove("hidden");
 }
 </script>
 
