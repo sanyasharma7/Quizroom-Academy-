@@ -14,15 +14,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-body { font-family: 'Inter', sans-serif; transition: background 0.4s, color 0.4s; }
-.card:hover { transform: scale(1.03); transition: all 0.3s ease; }
+body { font-family: 'Inter', sans-serif; transition: background .4s, color .4s; }
+.card:hover { transform: scale(1.03); transition: .3s; }
 </style>
 
 <script>
-// Tailwind dark mode class setup
-tailwind.config = {
-  darkMode: 'class'
-}
+// Tailwind dark mode
+tailwind.config = { darkMode: 'class' }
 </script>
 </head>
 
@@ -31,10 +29,9 @@ tailwind.config = {
 <div class="max-w-5xl mx-auto bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
 
 <!-- Header -->
-<div class="flex justify-between items-center">
-  <h1 class="text-3xl font-bold mb-6 text-blue-700 dark:text-blue-300">Quizroom Academy</h1>
+<div class="flex justify-between items-center mb-2">
+  <h1 class="text-3xl font-bold text-blue-700 dark:text-blue-300">Quizroom Academy</h1>
 
-  <!-- Theme Toggle -->
   <button id="themeToggle" class="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600">
     🌙 Night Mode
   </button>
@@ -92,19 +89,31 @@ tailwind.config = {
 <script>
 let quizData=[], currentQuestion=0, answers={};
 
-// Theme Toggle
+// 🌙 Theme Toggle
 const themeBtn = document.getElementById("themeToggle");
-themeBtn.addEventListener("click",()=>{
+themeBtn.onclick = () => {
   document.documentElement.classList.toggle("dark");
   themeBtn.textContent = document.documentElement.classList.contains("dark")
     ? "☀️ Day Mode"
     : "🌙 Night Mode";
-});
+};
 
-// Subtopics
+// 📢 Text-to-Speech
+function speakQuestion(text){
+  if ('speechSynthesis' in window){
+      window.speechSynthesis.cancel();
+      const msg = new SpeechSynthesisUtterance(text);
+      msg.rate = 1;
+      msg.pitch = 1;
+      msg.volume = 1;
+      window.speechSynthesis.speak(msg);
+  }
+}
+
+// Load subtopics
 function loadSubtopics(){
   fetch(`/get_subtopics/${examSelect.value}`)
-    .then(res=>res.json())
+    .then(r=>r.json())
     .then(data=>{
       subtopicSelect.innerHTML="";
       data.forEach(s=>{
@@ -114,74 +123,79 @@ function loadSubtopics(){
       });
     });
 }
-examSelect.addEventListener("change", loadSubtopics);
+examSelect.onchange=loadSubtopics;
 window.onload=loadSubtopics;
 
-// Load Quiz
-loadBtn.addEventListener("click",()=>{
+// Load quiz
+loadBtn.onclick = () => {
   fetch(`/get-quiz/${examSelect.value}/${subtopicSelect.value}`)
-    .then(res=>res.json())
-    .then(data=>{
-      quizData=data; currentQuestion=0; answers={};
-      renderQuestion();
-      navButtons.classList.remove("hidden");
-      submitBtn.classList.remove("hidden");
-      updateProgressBar(); updateLiveScore();
-    });
-});
+  .then(r=>r.json())
+  .then(data=>{
+    quizData=data; currentQuestion=0; answers={};
+    renderQuestion();
+    navButtons.classList.remove("hidden");
+    submitBtn.classList.remove("hidden");
+    updateProgress(); updateScore();
+  });
+};
 
 // Render Question
 function renderQuestion(){
-  const q=quizData[currentQuestion];
-  let html=`<div class="p-4 border rounded shadow-lg bg-white dark:bg-gray-700 card">
+  const q = quizData[currentQuestion];
+  let html = `<div class="p-4 border rounded shadow-lg bg-white dark:bg-gray-700 card">
               <p class="font-semibold text-lg">Q${currentQuestion+1}: ${q.question}</p>`;
+
   q.options.forEach(option=>{
     const checked = answers[currentQuestion]===option ? "checked" : "";
     html+=`<label class="block mt-2 p-2 border rounded cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 ${checked?'bg-blue-100 dark:bg-blue-700':''}">
             <input type="radio" name="q${currentQuestion}" value="${option}" ${checked} class="mr-2">${option}
            </label>`;
   });
+
   html+="</div>";
-  quizContainer.innerHTML=html;
+  quizContainer.innerHTML = html;
+
+  // 🔊 Speak Question
+  speakQuestion(q.question);
 }
 
 // Navigation
-prevBtn.onclick=()=>{ saveAnswer(); if(currentQuestion>0){currentQuestion--; renderQuestion();}};
-nextBtn.onclick=()=>{ saveAnswer(); if(currentQuestion<quizData.length-1){currentQuestion++; renderQuestion();}};
+prevBtn.onclick = ()=>{ saveAnswer(); if(currentQuestion>0){currentQuestion--; renderQuestion();}};
+nextBtn.onclick = ()=>{ saveAnswer(); if(currentQuestion<quizData.length-1){currentQuestion++; renderQuestion();}};
+
 function saveAnswer(){
-  const sel=document.querySelector(`input[name='q${currentQuestion}']:checked`);
-  answers[currentQuestion]=sel?sel.value:"";
-  updateProgressBar(); updateLiveScore();
+  const s=document.querySelector(`input[name='q${currentQuestion}']:checked`);
+  answers[currentQuestion]=s?s.value:"";
+  updateProgress(); updateScore();
 }
 
 // Progress + Live Score
-function updateProgressBar(){
+function updateProgress(){
   let percent=(Object.keys(answers).length/quizData.length)*100;
   progressBar.style.width = percent+"%";
 }
-function updateLiveScore(){
-  let score=0;
-  quizData.forEach((q,i)=>{ if(answers[i]===q.answer) score++; });
+function updateScore(){
+  let score=0; quizData.forEach((q,i)=>{ if(answers[i]===q.answer) score++; });
   liveScore.textContent = `Score: ${score} / ${quizData.length}`;
 }
 
 // Submit Quiz
-submitBtn.onclick=()=>{
+submitBtn.onclick = ()=>{
   saveAnswer();
   fetch(`/submit/${examSelect.value}/${subtopicSelect.value}`,{
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body:JSON.stringify(answers)
-  }).then(res=>res.json()).then(data=>{
-    renderResults();
-    renderTopicChart(data.incorrect_questions);
+  }).then(r=>r.json()).then(data=>{
+    showResults();
+    drawChart(data.incorrect_questions);
     aiSummaryText.textContent=data.ai_summary;
     aiSummaryCard.classList.remove("hidden");
   });
 };
 
-// Results
-function renderResults(){
+// Show results
+function showResults(){
   quizContainer.innerHTML="";
   quizData.forEach((q,i)=>{
     let correct = answers[i]===q.answer;
@@ -195,7 +209,7 @@ function renderResults(){
 }
 
 // Chart
-function renderTopicChart(incorrect){
+function drawChart(incorrect){
   const ctx=document.getElementById("topicChart").getContext("2d");
   new Chart(ctx,{
     type:'bar',
@@ -204,18 +218,19 @@ function renderTopicChart(incorrect){
       datasets:[{
         label:'Incorrect Questions',
         data:[incorrect.length],
-        backgroundColor:['rgba(75, 192, 192, 0.6)'],
-        borderRadius:8
+        backgroundColor:['rgba(75, 192, 192, 0.7)'],
+        borderRadius:10
       }]
     },
     options:{
       responsive:true,
-      scales:{ y:{ beginAtZero:true, grid:{display:true} }, x:{ grid:{display:false} } }
+      scales:{ y:{ beginAtZero:true, grid:{display:true}}, x:{grid:{display:false}} }
     }
   });
   topicChartContainer.classList.remove("hidden");
 }
 </script>
+
 </div>
 </body>
 </html>
