@@ -5,9 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Quizroom Academy</title>
 
-<!-- Tailwind + Chart.js -->
+<!-- Tailwind (CDN) -->
 <script src="https://cdn.tailwindcss.com"></script>
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Google Font -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <style>
@@ -15,198 +17,206 @@
     --glass-bg: rgba(255,255,255,0.14);
     --glass-border: rgba(255,255,255,0.18);
     --card-radius: 14px;
+    --max-width: 1100px;
   }
-  body { font-family: 'Inter', sans-serif; min-height: 100vh; margin:0; }
+  html,body { height:100%; font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
+  body { margin:0; background-size:400% 400%; transition: background 600ms ease; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
 
-  /* Animated gradient background */
-  .bg-animated { background-size: 300% 300%; animation: gradientMove 12s linear infinite; }
-  @keyframes gradientMove {
-    0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}
-  }
-
-  /* Glass card */
+  /* Glass panel */
   .glass {
     background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
     backdrop-filter: blur(10px) saturate(120%);
     -webkit-backdrop-filter: blur(10px) saturate(120%);
-    border-radius: var(--card-radius);
+    border: 1px solid var(--glass-border);
   }
 
   /* Card hover */
-  .card-hover:hover { transform: translateY(-6px) scale(1.01); transition: transform .22s ease; }
+  .card-hover { transition: transform .22s cubic-bezier(.2,.9,.3,1), box-shadow .22s ease; }
+  .card-hover:hover { transform: translateY(-6px) scale(1.01); box-shadow:0 20px 40px rgba(2,6,23,0.12); }
 
-  /* Option button styling */
-  .option-btn {
-    display:flex; align-items:center; gap:0.6rem;
-    border-radius:10px;
-    padding:10px 12px;
-    cursor:pointer;
-    user-select:none;
-    transition: transform .12s ease, background-color .12s ease, box-shadow .12s ease;
+  /* Small buttons */
+  .btn-sm { padding:.5rem .75rem; border-radius:8px; }
+
+  /* Floating live score */
+  #liveBadge { position: fixed; right: 16px; top: 16px; z-index:60; box-shadow: 0 10px 30px rgba(2,6,23,0.12); }
+
+  /* Responsive layout adjustments */
+  .app-max { max-width: var(--max-width); }
+
+  /* Background animations for themes */
+  .bg-upsc { background: linear-gradient(120deg,#0ea5e9 0%,#3b82f6 40%,#60a5fa 100%); animation: move 12s ease infinite; }
+  .bg-neet { background: linear-gradient(120deg,#7c3aed 0%,#d946ef 45%,#a78bfa 100%); animation: move 14s ease infinite; }
+  .bg-ssc  { background: linear-gradient(120deg,#16a34a 0%,#22c55e 45%,#bbf7d0 100%); animation: move 11s ease infinite; }
+  @keyframes move { 0% { background-position:0% 50% } 50% { background-position:100% 50% } 100% { background-position:0% 50% } }
+
+  /* Option button mobile-friendly */
+  .option-btn { width:100%; display:block; text-align:left; }
+
+  /* Ad placeholder */
+  .ad-slot { background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03)); border: 1px dashed rgba(255,255,255,0.08); padding:8px; border-radius:8px; color:rgba(255,255,255,0.8); }
+
+  /* result styles */
+  .result-correct { background: rgba(16,185,129,0.12); border-left: 4px solid rgba(16,185,129,0.9); }
+  .result-wrong { background: rgba(239,68,68,0.08); border-left: 4px solid rgba(239,68,68,0.9); }
+
+  /* small screens tweak */
+  @media (max-width: 880px) {
+    .sidebar { display:none; }
+    .app-max { padding: 1rem; }
   }
-  .option-btn:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,0,0,0.06); }
-
-  /* Selected and correct/incorrect states */
-  .option-selected { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.18); }
-  .option-correct { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.16); }
-  .option-wrong { background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.14); }
-
-  /* small helpers */
-  .shadow-soft { box-shadow: 0 6px 20px rgba(2,6,23,0.06); }
-  .badge-anim { animation: bounce 1.1s infinite; }
-  @keyframes bounce { 0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);} }
-
-  /* responsive adjustments */
-  @media (min-width: 992px) {
-    .layout-grid { display:grid; grid-template-columns: 1fr 340px; gap:22px; align-items:start; }
-  }
-  @media (max-width: 991px) {
-    .layout-grid { display:block; }
-  }
-
-  /* ad placeholder */
-  .ad-slot { min-height:60px; border:2px dashed rgba(255,255,255,0.12); display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.7); border-radius:10px;}
 </style>
 </head>
-<body class="bg-animated" id="pageBody">
 
-<!-- Top navbar -->
+<body class="min-h-screen bg-upsc">
+
+<!-- NAVBAR -->
 <header class="w-full glass sticky top-0 z-50">
-  <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+  <div class="app-max mx-auto flex items-center justify-between px-4 py-3">
     <div class="flex items-center gap-3">
-      <!-- Logo -->
-      <div class="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="white"><path d="M4 6h16M4 12h10M4 18h16" stroke-width="1.5" stroke-linecap="round"></path></svg>
-      </div>
-      <div class="text-white">
-        <div class="text-lg font-semibold">Quizroom Academy</div>
-        <div class="text-xs opacity-80">Smart MCQ practice • multi-exam</div>
+      <div class="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center text-white font-bold">QA</div>
+      <div>
+        <div class="text-white font-semibold text-lg">Quizroom Academy</div>
+        <div class="text-white/80 text-xs">Smart MCQ practice for students</div>
       </div>
     </div>
 
     <div class="flex items-center gap-3">
-      <button id="themeToggle" class="px-3 py-1 rounded-md text-sm glass text-white">Toggle Theme</button>
-      <div id="bookmarkCounter" class="text-white text-sm opacity-90 hidden">🔖 <span id="bmCount">0</span></div>
+      <button id="themeToggle" class="text-white bg-white/10 px-3 py-1 rounded btn-sm">Toggle Theme</button>
     </div>
   </div>
 </header>
 
-<main class="max-w-6xl mx-auto p-4 mt-6">
-  <!-- container with left question area + right sidebar -->
-  <div class="layout-grid">
+<!-- MAIN -->
+<main class="app-max mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 px-4 py-6">
 
-    <!-- LEFT: Quiz area -->
-    <section class="space-y-4">
+  <!-- LEFT / MAIN COLUMN -->
+  <section class="lg:col-span-2 space-y-4">
 
-      <!-- exam selector card -->
-      <div class="glass p-4 card-hover shadow-soft">
+    <!-- Exam selector card -->
+    <div class="glass p-4 rounded-xl card-hover">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:gap-3 justify-between">
         <div class="flex flex-wrap gap-3 items-center">
-          <div class="text-white font-semibold">Exam</div>
-          <select id="examSelect" class="px-3 py-2 rounded-md text-black">
-            <option value="upsc">UPSC</option>
-            <option value="neet_pg">NEET PG</option>
-            <option value="ssc">SSC</option>
-          </select>
-
-          <div class="text-white font-semibold">Year / Topic</div>
-          <select id="subtopicSelect" class="px-3 py-2 rounded-md text-black"></select>
-
-          <button id="loadBtn" class="ml-auto bg-white text-black px-4 py-2 rounded-md font-semibold">Load Quiz</button>
-        </div>
-      </div>
-
-      <!-- big quiz card -->
-      <div id="quizPanel" class="glass p-5 rounded-xl shadow-soft">
-        <!-- header: progress + small controls -->
-        <div class="flex items-center justify-between mb-4">
-          <div class="flex items-center gap-3">
-            <div id="liveScore" class="text-white font-bold text-lg">Score: 0</div>
-            <div class="text-white/80 text-sm">•</div>
-            <div id="progressText" class="text-white/80 text-sm">0 / 0 answered</div>
+          <div class="flex items-center gap-2">
+            <label class="text-white font-medium">Exam</label>
+            <select id="examSelect" class="rounded-md px-3 py-2 text-sm" aria-label="Select exam">
+              <option value="upsc">UPSC</option>
+              <option value="neet_pg">NEET PG</option>
+              <option value="ssc">SSC</option>
+            </select>
           </div>
 
           <div class="flex items-center gap-2">
-            <button id="audioToggle" title="Toggle audio" class="px-2 py-1 rounded bg-white/10 text-white">🔊</button>
-            <button id="bookmarkBtn" class="px-3 py-1 bg-yellow-400 rounded hidden">Bookmark</button>
+            <label class="text-white font-medium">Year / Topic</label>
+            <select id="subtopicSelect" class="rounded-md px-3 py-2 text-sm" aria-label="Select subtopic"></select>
           </div>
+
+          <button id="loadBtn" class="ml-2 bg-white text-gray-800 px-4 py-2 rounded-md font-semibold hover:scale-105">Load Quiz</button>
         </div>
 
-        <!-- question area -->
-        <div id="quizContainer"></div>
+        <div class="flex gap-2 mt-3 sm:mt-0">
+          <button id="ttsToggle" class="bg-white/10 text-white px-3 py-2 rounded-md btn-sm">🔊 TTS</button>
+          <button id="bookmarkListBtn" class="bg-white/10 text-white px-3 py-2 rounded-md btn-sm">★ Bookmarks</button>
+        </div>
+      </div>
+    </div>
 
-        <!-- navigation -->
-        <div id="navButtons" class="hidden mt-4 flex items-center justify-between">
+    <!-- QUIZ CARD -->
+    <div id="quizArea" class="space-y-4">
+      <!-- question cards injected here -->
+      <div id="quizContainer" class="space-y-4"></div>
+
+      <!-- nav & submit -->
+      <div id="controls" class="flex flex-wrap gap-3 items-center justify-between">
+        <div class="flex gap-2">
+          <button id="prevBtn" class="bg-white/10 text-white px-4 py-2 rounded-md">Previous</button>
+          <button id="nextBtn" class="bg-white/10 text-white px-4 py-2 rounded-md">Next</button>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button id="bookmarkBtn" class="hidden bg-yellow-400 text-black px-4 py-2 rounded-md">Bookmark</button>
+          <button id="submitBtn" class="hidden bg-green-500 text-white px-4 py-2 rounded-md">Submit</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result / AI summary area -->
+    <div id="resultArea" class="space-y-4">
+      <div id="resultHeader" class="hidden glass p-4 rounded-xl">
+        <div class="flex items-center justify-between">
           <div>
-            <button id="prevBtn" class="px-4 py-2 bg-white/10 rounded text-white">Previous</button>
+            <div id="scoreText" class="text-white text-lg font-semibold">Your Score: 0 / 0</div>
+            <div id="badgeText" class="text-white/80 text-sm mt-1">Badge: —</div>
           </div>
-          <div class="flex items-center gap-3">
-            <div class="w-56 bg-white/20 h-3 rounded overflow-hidden">
-              <div id="progressBar" class="h-3 bg-green-400 w-0"></div>
-            </div>
-            <button id="nextBtn" class="px-4 py-2 bg-white/10 rounded text-white">Next</button>
-          </div>
-        </div>
-
-        <!-- submit -->
-        <div class="mt-4 text-center">
-          <button id="submitBtn" class="hidden bg-gradient-to-r from-green-400 to-teal-500 text-white px-6 py-2 rounded-lg font-semibold">Submit Quiz</button>
-        </div>
-      </div>
-
-      <!-- small ad placeholder mobile -->
-      <div class="mt-4 md:hidden">
-        <div class="ad-slot glass p-3">Ad slot (mobile) - placeholder</div>
-      </div>
-    </section>
-
-    <!-- RIGHT: Sidebar -->
-    <aside class="space-y-4">
-
-      <!-- summary card -->
-      <div class="glass p-4 rounded-xl shadow-soft">
-        <div class="flex items-center justify-between mb-2">
-          <h3 class="text-white font-semibold">Quick Controls</h3>
-          <div class="text-sm text-white/80">Tip: Tap options to select</div>
-        </div>
-
-        <div class="space-y-3">
-          <div class="text-white/80 text-sm">Question navigator</div>
-          <div id="questionNav" class="flex flex-wrap gap-2"></div>
-
-          <div class="mt-2">
-            <div class="text-white/80 text-sm">Bookmarks</div>
-            <div id="bookmarkList" class="flex flex-wrap gap-2 mt-2"></div>
+          <div class="text-right">
+            <button id="reviewWrongBtn" class="bg-white/10 text-white px-3 py-1 rounded btn-sm">Review Wrong</button>
+            <button id="downloadSummaryBtn" class="bg-white/10 text-white px-3 py-1 rounded btn-sm">Download</button>
           </div>
         </div>
       </div>
 
-      <!-- chart -->
-      <div id="topicChartContainer" class="glass p-4 rounded-xl shadow-soft hidden">
-        <h3 class="text-white font-semibold mb-2">Topic-wise</h3>
-        <canvas id="topicChart"></canvas>
-      </div>
+      <div id="resultsList" class="space-y-2"></div>
 
-      <!-- AI summary -->
-      <div id="aiSummaryCard" class="glass p-4 rounded-xl shadow-soft hidden">
-        <h3 class="text-white font-semibold mb-2">AI Summary</h3>
+      <div id="aiSummaryCard" class="hidden glass p-4 rounded-xl">
+        <h3 class="text-white font-semibold mb-2">AI Study Recommendations</h3>
         <div id="aiSummaryText" class="text-white/90 text-sm"></div>
       </div>
+    </div>
 
-      <!-- ad placeholder desktop -->
-      <div class="hidden md:block">
-        <div class="ad-slot p-4 glass">Ad slot (desktop sidebar) - placeholder</div>
+    <!-- bottom ad placeholder (mobile) -->
+    <div class="lg:hidden mt-4">
+      <div class="ad-slot text-center py-3 rounded-md">Ad slot (mobile bottom) — reserved</div>
+    </div>
+  </section>
+
+  <!-- RIGHT / SIDEBAR -->
+  <aside class="sidebar lg:col-span-1 space-y-4">
+    <!-- live score floating (desktop) -->
+    <div id="liveBadge" class="hidden lg:block glass p-3 rounded-xl" style="position:sticky; top:90px;">
+      <div class="text-white font-semibold">Live Score</div>
+      <div id="liveScore" class="text-white/90 text-sm">0 / 0</div>
+      <div class="w-36 h-3 bg-white/20 rounded mt-2 overflow-hidden">
+        <div id="progressBar" class="h-3 bg-green-400 rounded w-0 transition-all"></div>
       </div>
-    </aside>
-  </div>
+    </div>
+
+    <!-- topic chart -->
+    <div id="topicChartContainer" class="glass p-4 rounded-xl hidden">
+      <h4 class="text-white font-semibold mb-2">Topic performance</h4>
+      <canvas id="topicChart"></canvas>
+    </div>
+
+    <!-- bookmarks panel -->
+    <div id="bookmarkPanel" class="glass p-4 rounded-xl hidden">
+      <h4 class="text-white font-semibold mb-2">Bookmarked Qs</h4>
+      <div id="bookmarkList" class="text-white/90 text-sm space-y-1"></div>
+    </div>
+
+    <!-- ad placeholder desktop -->
+    <div class="glass p-3 rounded-xl text-white text-sm ad-slot">
+      Ad slot (desktop) — 300x250
+    </div>
+  </aside>
+
 </main>
 
+<!-- FOOTER / sticky ad -->
+<footer class="fixed left-0 right-0 bottom-0 lg:hidden p-2 z-40">
+  <div class="mx-auto max-w-md text-center">
+    <div class="ad-slot">Bottom Ad placeholder — reserve spacing</div>
+  </div>
+</footer>
+
+<!-- SCRIPT: app logic -->
 <script>
-/* -------------------------
-  Configuration & state
----------------------------*/
-let quizData = [], currentQuestion = 0, answers = {}, bookmarks = [];
-let audioEnabled = true;
+/* ========= App state ========= */
+let quizData = [];
+let currentQuestion = 0;
+let answers = {};         // { index: option }
+let bookmarks = [];       // array of question indices
+let ttsEnabled = true;
+let activeTheme = 'upsc';
+
+/* DOM refs */
 const examSelect = document.getElementById('examSelect');
 const subtopicSelect = document.getElementById('subtopicSelect');
 const loadBtn = document.getElementById('loadBtn');
@@ -214,294 +224,332 @@ const quizContainer = document.getElementById('quizContainer');
 const prevBtn = document.getElementById('prevBtn');
 const nextBtn = document.getElementById('nextBtn');
 const submitBtn = document.getElementById('submitBtn');
-const navButtons = document.getElementById('navButtons');
-const progressBar = document.getElementById('progressBar');
-const liveScore = document.getElementById('liveScore');
-const progressText = document.getElementById('progressText');
 const bookmarkBtn = document.getElementById('bookmarkBtn');
-const bookmarkCounter = document.getElementById('bookmarkCounter');
-const bmCount = document.getElementById('bmCount');
+const bookmarkListBtn = document.getElementById('bookmarkListBtn');
+const bookmarkPanel = document.getElementById('bookmarkPanel');
 const bookmarkList = document.getElementById('bookmarkList');
-const questionNav = document.getElementById('questionNav');
 const topicChartContainer = document.getElementById('topicChartContainer');
 const aiSummaryCard = document.getElementById('aiSummaryCard');
 const aiSummaryText = document.getElementById('aiSummaryText');
-const audioToggle = document.getElementById('audioToggle');
+const resultHeader = document.getElementById('resultHeader');
+const resultsList = document.getElementById('resultsList');
+const scoreText = document.getElementById('scoreText');
+const badgeText = document.getElementById('badgeText');
+const liveScoreEls = document.querySelectorAll('#liveScore');
+const progressBarEls = document.querySelectorAll('#progressBar');
+const ttsToggle = document.getElementById('ttsToggle');
+const themeToggle = document.getElementById('themeToggle');
+const reviewWrongBtn = document.getElementById('reviewWrongBtn');
+const downloadSummaryBtn = document.getElementById('downloadSummaryBtn');
 
-/* Persist bookmarks and last exam in localStorage */
-const STORAGE_KEY = 'quizroom_state_v1';
-function saveLocalState(){
-  const state = { bookmarks, answers, exam: examSelect.value, subtopic: subtopicSelect.value };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-}
-function loadLocalState(){
-  try{
-    const s = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-    if(s && s.bookmarks) bookmarks = s.bookmarks;
-  }catch(e){}
-}
+/* Chart instance */
+let topicChart = null;
 
-/* Background themes */
-const examBg = {
-  upsc: 'linear-gradient(120deg,#0ea5e9 0%, #3b82f6 40%, #312e81 100%)',
-  neet_pg: 'linear-gradient(120deg,#7c3aed 0%, #d946ef 50%, #4c1d95 100%)',
-  ssc: 'linear-gradient(120deg,#16a34a 0%, #22c55e 50%, #166534 100%)'
+/* Theme backgrounds */
+const themeMap = {
+  upsc: 'bg-upsc',
+  neet_pg: 'bg-neet',
+  ssc: 'bg-ssc'
 };
 
-/* initially set body bg */
-document.getElementById('pageBody').style.background = examBg[examSelect.value];
-
-/* change background when exam changes */
-examSelect.addEventListener('change', e => {
-  document.getElementById('pageBody').style.background = examBg[e.target.value] || examBg.upsc;
+/* ================= Init ================= */
+function init() {
   loadSubtopics();
-  // store exam selection
-  saveLocalState();
-});
+  examSelect.addEventListener('change', onExamChange);
+  loadBtn.addEventListener('click', onLoadQuiz);
+  prevBtn.addEventListener('click', onPrev);
+  nextBtn.addEventListener('click', onNext);
+  submitBtn.addEventListener('click', onSubmit);
+  bookmarkBtn.addEventListener('click', onBookmarkCurrent);
+  bookmarkListBtn.addEventListener('click', toggleBookmarkPanel);
+  ttsToggle.addEventListener('click', ()=>{ ttsEnabled = !ttsEnabled; ttsToggle.textContent = ttsEnabled? '🔊 TTS' : '🔈 TTS'; });
+  themeToggle.addEventListener('click', ()=>{ document.body.classList.toggle('invert'); });
+  reviewWrongBtn.addEventListener('click', reviewWrongQuestions);
+  downloadSummaryBtn.addEventListener('click', downloadSummary);
+}
+init();
 
-/* audio toggle */
-audioToggle.onclick = ()=> { audioEnabled = !audioEnabled; audioToggle.style.opacity = audioEnabled? '1':'0.5'; };
-
-/* Load subtopics from backend */
+/* ========= Subtopics ========= */
 function loadSubtopics(){
   fetch(`/get_subtopics/${examSelect.value}`)
-    .then(r => r.json())
-    .then(list => {
+    .then(r=>r.json())
+    .then(list=>{
       subtopicSelect.innerHTML = '';
-      if(!list || list.length === 0){
-        const opt = document.createElement('option'); opt.value='default'; opt.innerText='default'; subtopicSelect.appendChild(opt);
-      } else {
-        list.forEach(s => { const opt = document.createElement('option'); opt.value = s; opt.innerText = s; subtopicSelect.appendChild(opt); });
-      }
-    })
-    .catch(()=>{ subtopicSelect.innerHTML = '<option value="default">default</option>'; });
+      if(!list || list.length===0){ subtopicSelect.innerHTML = '<option value="">No topics</option>'; return; }
+      list.forEach(s=>{
+        const opt = document.createElement('option'); opt.value = s; opt.innerText = s; subtopicSelect.appendChild(opt);
+      });
+    });
 }
-window.addEventListener('load', () => { loadSubtopics(); loadLocalBookmarksUI(); });
 
-/* Load quiz */
-loadBtn.addEventListener('click', () => {
-  fetch(`/get-quiz/${examSelect.value}/${subtopicSelect.value}`)
+function onExamChange(e){
+  const exam = examSelect.value;
+  // Update background theme
+  Object.values(themeMap).forEach(c=> document.body.classList.remove(c));
+  const themeClass = themeMap[exam] || themeMap.upsc;
+  document.body.classList.add(themeClass);
+  // Load subtopics for new exam
+  loadSubtopics();
+}
+
+/* ========= Load quiz ========= */
+function onLoadQuiz(){
+  const exam = examSelect.value;
+  const sub = subtopicSelect.value;
+  if(!sub){ alert('Select a year/topic'); return; }
+  fetch(`/get-quiz/${exam}/${sub}`)
     .then(r => r.json())
     .then(data => {
       quizData = data || [];
-      currentQuestion = 0; answers = {}; // fresh session
-      // restore answers/bookmarks from localStorage if present for this exam/subtopic (optional)
+      currentQuestion = 0;
+      answers = {};
+      bookmarks = [];
       renderQuestion();
-      navButtons.classList.remove('hidden');
-      submitBtn.classList.remove('hidden');
+      // show controls
+      document.getElementById('controls').classList.remove('hidden');
       bookmarkBtn.classList.remove('hidden');
-      renderQuestionNav();
+      submitBtn.classList.remove('hidden');
+      // hide previous result sections
+      document.getElementById('resultsList').innerHTML = '';
+      aiSummaryCard.classList.add('hidden');
+      topicChartContainer.classList.add('hidden');
+      resultHeader.classList.add('hidden');
+      // update UI
       updateProgress();
+      updateLiveScore();
+      updateBookmarkPanel();
     })
-    .catch(err => { alert('Failed to load quiz'); console.error(err); });
-});
-
-
-/* Render question card */
-function renderQuestion(){
-  if(!quizData || quizData.length === 0){
-    quizContainer.innerHTML = `<div class="text-white/80">No questions found for this selection.</div>`;
-    return;
-  }
-
-  const q = quizData[currentQuestion];
-  const total = quizData.length;
-  // build HTML using option buttons - touch friendly
-  let html = `<div class="mb-4">
-    <div class="flex items-center justify-between mb-3">
-      <div class="text-white font-semibold">Q ${currentQuestion+1} of ${total}</div>
-      <div class="text-white/80 text-sm">${q.topic || subtopicSelect.value}</div>
-    </div>
-    <div class="p-4 rounded-lg glass card-hover shadow-soft">
-      <div class="text-white font-medium text-lg mb-3">${escapeHtml(q.question)}</div>`;
-
-  // options
-  html += `<div class="grid gap-3">`;
-  q.options.forEach((opt, idx) => {
-    const sel = answers[currentQuestion] === opt;
-    html += `<div class="option-btn ${sel ? 'option-selected' : ''}" data-val="${escapeHtml(opt)}" onclick="selectOption(${currentQuestion}, ${idx})">
-      <div class="w-6 h-6 flex items-center justify-center rounded-full bg-white/8 text-white text-sm">${String.fromCharCode(65+idx)}</div>
-      <div class="text-white">${escapeHtml(opt)}</div>
-    </div>`;
-  });
-  html += `</div></div></div>`;
-
-  quizContainer.innerHTML = html;
-  renderBookmarkState();
-  if(audioEnabled) speakText(q.question);
-  updateProgress();
+    .catch(err=>{
+      console.error(err);
+      alert('Failed to load quiz');
+    });
 }
 
-/* select option handler (exposed to DOM via onclick attr) */
-window.selectOption = function(qIndex, optIndex){
-  if(!quizData[qIndex]) return;
-  answers[qIndex] = quizData[qIndex].options[optIndex];
-  renderQuestion();         // re-render to update selected state
-  renderQuestionNav();      // update nav
-  updateProgress();
-  saveLocalState();
-};
+/* ========= Render question card ========= */
+function renderQuestion(){
+  if(!quizData || quizData.length===0){
+    quizContainer.innerHTML = `<div class="glass p-4 rounded-xl text-white/90">No questions found for this selection.</div>`;
+    return;
+  }
+  const q = quizData[currentQuestion];
+  // mobile-friendly option buttons
+  let html = `<div class="glass p-4 rounded-xl card-hover text-white">
+        <div class="flex justify-between items-start mb-2">
+          <div>
+            <div class="text-sm text-white/80">Question ${currentQuestion+1} of ${quizData.length}</div>
+            <h3 class="text-lg font-semibold mt-1">${escapeHtml(q.question)}</h3>
+          </div>
+          <div class="text-right">
+            <div class="text-xs text-white/70 mb-1">${bookmarks.includes(currentQuestion)? '★ Bookmarked' : ''}</div>
+            <div class="text-xs text-white/70">Difficulty: ${q.difficulty || '—'}</div>
+          </div>
+        </div>
+        <div class="grid gap-2">`;
 
-/* navigation buttons */
-prevBtn.addEventListener('click', () => { saveAnswer(); if(currentQuestion>0){ currentQuestion--; renderQuestion(); } });
-nextBtn.addEventListener('click', () => { saveAnswer(); if(currentQuestion < quizData.length-1){ currentQuestion++; renderQuestion(); }});
+  q.options.forEach(opt=>{
+    const isChecked = answers[currentQuestion] === opt ? 'ring-2 ring-white/30 bg-white/5' : '';
+    html += `<button data-value="${escapeAttr(opt)}" class="option-btn text-left option-item glass p-3 rounded-md ${isChecked}">
+        <div class="flex items-center gap-3">
+          <div class="w-6 h-6 rounded-full border border-white/25 flex items-center justify-center text-sm text-white/90">${opt[0] ? opt[0].toUpperCase() : ''}</div>
+          <div class="flex-1 text-white">${escapeHtml(opt)}</div>
+        </div>
+      </button>`;
+  });
 
-/* save answer for current question (already saved on click) */
-function saveAnswer(){ /* answers updated on click */ }
+  // audio + hint row
+  html += `</div>
+      <div class="flex items-center justify-between mt-3">
+        <div class="flex gap-2">
+          <button id="playQ" class="bg-white/10 text-white px-3 py-1 rounded btn-sm">Play</button>
+          ${q.hint ? `<button id="hintBtn" class="bg-white/10 text-white px-3 py-1 rounded btn-sm">Hint</button>` : ''}
+        </div>
+        <div class="text-sm text-white/80">Topic: ${q.topic || subtopicSelect.value}</div>
+      </div>
+    </div>`;
 
-/* progress & live score */
+  quizContainer.innerHTML = html;
+
+  // attach option listeners
+  document.querySelectorAll('.option-item').forEach(btn=>{
+    btn.addEventListener('click', (ev)=>{
+      const val = ev.currentTarget.getAttribute('data-value');
+      answers[currentQuestion] = val;
+      // visual toggle
+      document.querySelectorAll('.option-item').forEach(el => el.classList.remove('ring-2','ring-white/30','bg-white/5'));
+      ev.currentTarget.classList.add('ring-2','ring-white/30','bg-white/5');
+      updateProgress();
+      updateLiveScore();
+    });
+  });
+
+  // play & hint
+  const playBtn = document.getElementById('playQ');
+  playBtn && playBtn.addEventListener('click', ()=> speakText(q.question));
+
+  const hintBtn = document.getElementById('hintBtn');
+  hintBtn && hintBtn.addEventListener('click', ()=>{
+    alert(q.hint || 'No hint available');
+  });
+
+  // highlight bookmark state UI
+  if(bookmarks.includes(currentQuestion)) bookmarkBtn.classList.add('bg-yellow-600'); else bookmarkBtn.classList.remove('bg-yellow-600');
+}
+
+/* ========= Navigation ========= */
+function onPrev(){ if(currentQuestion>0){ currentQuestion--; renderQuestion(); } }
+function onNext(){ if(currentQuestion < quizData.length - 1){ currentQuestion++; renderQuestion(); } }
+
+/* ========= Bookmark ========= */
+function onBookmarkCurrent(){
+  if(!bookmarks.includes(currentQuestion)) bookmarks.push(currentQuestion);
+  updateBookmarkPanel();
+  bookmarkBtn.classList.add('bg-yellow-600');
+}
+function updateBookmarkPanel(){
+  bookmarkList.innerHTML = '';
+  if(bookmarks.length===0){ bookmarkList.innerHTML = '<div class="text-white/80 text-sm">No bookmarks</div>'; return; }
+  bookmarks.forEach(i=>{
+    const q = quizData[i];
+    const el = document.createElement('div');
+    el.className = 'text-white/90 text-sm py-1 border-b border-white/6';
+    el.innerHTML = `<div class="flex justify-between items-center"><div class="flex-1 pr-2">${i+1}. ${escapeHtml(q.question)}</div>
+      <div><button data-i="${i}" class="text-xs bg-white/10 px-2 py-1 rounded">Go</button></div></div>`;
+    bookmarkList.appendChild(el);
+  });
+  // attach go handlers
+  bookmarkList.querySelectorAll('button').forEach(btn=>{
+    btn.addEventListener('click', e=>{ const i = Number(e.currentTarget.getAttribute('data-i')); currentQuestion = i; renderQuestion(); toggleBookmarkPanel(); });
+  });
+}
+function toggleBookmarkPanel(){ bookmarkPanel.classList.toggle('hidden'); }
+
+/* ========= Progress & Live Score ========= */
 function updateProgress(){
-  const answered = Object.keys(answers).length;
-  const total = quizData.length || 0;
-  progressBar.style.width = total ? ((answered/total)*100)+'%' : '0%';
-  progressText.innerText = `${answered} / ${total} answered`;
-  // live score compute with available answers
+  const answeredCount = Object.keys(answers).length;
+  const percent = quizData.length ? Math.round((answeredCount / quizData.length) * 100) : 0;
+  progressBarEls.forEach(pb => pb.style.width = percent + '%');
+}
+function updateLiveScore(){
   let score = 0;
   for(let i=0;i<quizData.length;i++){
     if(answers[i] && quizData[i] && answers[i] === quizData[i].answer) score++;
   }
-  liveScore.innerText = `Score: ${score} / ${quizData.length}`;
+  liveScoreEls.forEach(el => el.innerText = `${score} / ${quizData.length}`);
+  // small top badge on header too
+  document.querySelectorAll('#liveScore').forEach(el=> el.innerText = `${score} / ${quizData.length}`);
 }
 
-/* Bookmark logic */
-bookmarkBtn.addEventListener('click', () => {
-  if(!bookmarks.includes(currentQuestion)) bookmarks.push(currentQuestion);
-  highlightBookmark();
-  renderBookmarkUI();
-  saveLocalState();
-});
-function highlightBookmark(){
-  if(bookmarks.includes(currentQuestion)) bookmarkBtn.classList.add('bg-yellow-600'); else bookmarkBtn.classList.remove('bg-yellow-600');
+/* ========= Submit & Results ========= */
+function onSubmit(){
+  // ensure at least one answer or confirmation
+  if(Object.keys(answers).length === 0 && !confirm('You have not answered any questions. Submit anyway?')) return;
+
+  // send answers to backend
+  const exam = examSelect.value, sub = subtopicSelect.value;
+  fetch(`/submit/${exam}/${sub}`, {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json' },
+    body: JSON.stringify(answers)
+  }).then(r=>r.json()).then(res=>{
+    // show results header
+    resultHeader.classList.remove('hidden');
+    scoreText.innerText = `Your Score: ${res.score} / ${res.total}`;
+    // badge logic
+    const pct = res.total? (res.score / res.total) * 100 : 0;
+    let badge = 'Keep Practicing';
+    if(pct === 100) badge = 'Perfect ✅';
+    else if(pct >= 80) badge = 'Great 🥇';
+    else if(pct >= 50) badge = 'Good 👍';
+    badgeText.innerText = `Badge: ${badge}`;
+    // render result cards
+    renderResults(res);
+    // AI summary
+    aiSummaryText.innerText = res.ai_summary || '—';
+    aiSummaryCard.classList.remove('hidden');
+    // chart
+    renderTopicChart(res.incorrect_questions || []);
+  }).catch(e=>{ console.error(e); alert('Submit failed'); });
 }
-function renderBookmarkUI(){
-  // counter
-  const count = bookmarks.length;
-  if(count>0){ bookmarkCounter.style.display = 'inline-block'; bmCount.innerText = count; } else { bookmarkCounter.style.display = 'none'; }
-  // list
-  bookmarkList.innerHTML = '';
-  bookmarks.forEach(i=>{
-    const el = document.createElement('button');
-    el.className = 'px-2 py-1 rounded bg-white/10 text-white text-sm';
-    el.innerText = `Q ${i+1}`;
-    el.onclick = ()=> { currentQuestion = i; renderQuestion(); };
-    bookmarkList.appendChild(el);
+
+function renderResults(res){
+  resultsList.innerHTML = '';
+  quizData.forEach((q,i)=>{
+    const correct = answers[i] === q.answer;
+    const div = document.createElement('div');
+    div.className = `p-3 rounded-md ${correct? 'result-correct' : 'result-wrong' }`;
+    div.innerHTML = `<div class="flex justify-between items-start">
+        <div class="flex-1">
+          <div class="font-semibold text-white">Q${i+1}. ${escapeHtml(q.question)}</div>
+          <div class="text-white/90 mt-1">Your Answer: <span class="font-medium">${escapeHtml(answers[i] || 'Not answered')}</span></div>
+          ${!correct? `<div class="text-white/90 mt-1">Correct: <span class="font-medium">${escapeHtml(q.answer)}</span></div>` : ''}
+        </div>
+      </div>`;
+    resultsList.appendChild(div);
   });
 }
-/* restore from local */
-function loadLocalBookmarksUI(){
-  loadLocalState();
-  renderBookmarkUI();
-}
 
-/* render question navigation grid */
-function renderQuestionNav(){
-  questionNav.innerHTML = '';
-  for(let i=0;i<quizData.length;i++){
-    const but = document.createElement('button');
-    but.className = `px-2 py-1 rounded text-sm ${answers[i] ? 'bg-green-600 text-white' : 'bg-white/10 text-white/80'}`;
-    but.innerText = i+1;
-    but.onclick = ()=>{ currentQuestion = i; renderQuestion(); };
-    questionNav.appendChild(but);
-  }
-}
-
-/* Submit quiz -> call backend, show results, chart, AI summary */
-submitBtn.addEventListener('click', ()=>{
-  // ensure last answer saved
-  saveAnswer();
-  fetch(`/submit/${examSelect.value}/${subtopicSelect.value}`, {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify(answers)
-  }).then(r => r.json())
-    .then(resp => {
-      // render colored result cards
-      renderResultCards(resp);
-      // show topic chart
-      renderTopicChart(resp.incorrect_questions);
-      // show AI summary
-      aiSummaryText.innerText = resp.ai_summary || 'No summary available.';
-      aiSummaryCard.classList.remove('hidden');
-      // scroll to results
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }).catch(err => {
-      console.error(err); alert('Submit failed.');
-    });
-});
-
-/* draw result cards */
-function renderResultCards(resp){
-  quizContainer.innerHTML = '';
-  for(let i=0;i<quizData.length;i++){
-    const q = quizData[i];
-    const user = answers[i] || 'Not Answered';
-    const correct = q.answer;
-    const isCorrect = user === correct;
-    const colorClass = isCorrect ? 'bg-white/6 border-l-4 border-green-400' : 'bg-white/6 border-l-4 border-red-400';
-    const block = document.createElement('div');
-    block.className = `p-4 rounded mb-3 ${colorClass} glass`;
-    block.innerHTML = `<div class="flex justify-between items-start">
-        <div class="font-semibold text-white">Q ${i+1}: ${escapeHtml(q.question)}</div>
-        <div class="text-sm text-white/80">${isCorrect ? 'Correct' : 'Incorrect'}</div>
-      </div>
-      <div class="mt-2 text-white/90">Your answer: <strong>${escapeHtml(user)}</strong></div>
-      <div class="mt-1 text-white/80">Correct answer: <strong>${escapeHtml(correct)}</strong></div>`;
-    quizContainer.appendChild(block);
-  }
-  // hide nav & submit
-  navButtons.classList.add('hidden');
-  submitBtn.classList.add('hidden');
-}
-
-/* Topic chart: counts incorrect by topic (fallback to subtopic name) */
-let chartInstance = null;
+/* ========= Chart ========= */
 function renderTopicChart(incorrectQuestions){
-  // build counts (all assigned to current subtopic for now)
-  const topicCounts = {};
-  if(!quizData || quizData.length === 0) return;
-  const key = subtopicSelect.value || 'topic';
-  topicCounts[key] = incorrectQuestions.length || 0;
-
-  // prepare data
-  const labels = Object.keys(topicCounts);
-  const data = Object.values(topicCounts);
-
-  // destroy old chart
-  if(chartInstance) chartInstance.destroy();
+  // simple mapping: group by subtopic (for now, single subtopic)
+  const label = subtopicSelect.value || 'Topic';
+  const wrongCount = (Array.isArray(incorrectQuestions) ? incorrectQuestions.length : 0);
+  // create/destroy chart
+  if(topicChart) topicChart.destroy();
   const ctx = document.getElementById('topicChart').getContext('2d');
-  chartInstance = new Chart(ctx, {
-    type: 'bar',
-    data: { labels, datasets: [{ label: 'Incorrect', data, backgroundColor: 'rgba(255,99,132,0.7)' }] },
-    options: { responsive: true, plugins: { legend: { display: false } } }
+  topicChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Correct', 'Incorrect'],
+      datasets: [{
+        data: [quizData.length - wrongCount, wrongCount],
+        backgroundColor: ['#34d399','#fb7185']
+      }]
+    },
+    options: { responsive:true, plugins:{ legend:{ position:'bottom', labels:{ color: '#fff' } } } }
   });
   topicChartContainer.classList.remove('hidden');
+  // also show sidebar bookmark panel (desktop)
+  bookmarkPanel.classList.remove('hidden');
 }
 
-/* Simple TTS */
-function speakText(text){
-  if(!('speechSynthesis' in window)) return;
-  try {
-    window.speechSynthesis.cancel(); // stop previous
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'en-US';
-    u.rate = 0.95;
-    window.speechSynthesis.speak(u);
-  } catch(e){ console.warn(e); }
+/* ========= Utility: TTS ========= */
+function speakText(txt){
+  if(!ttsEnabled) return;
+  if('speechSynthesis' in window){
+    try{
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(txt);
+      u.rate = 0.95; u.pitch = 1.0; u.lang = 'en-GB';
+      window.speechSynthesis.speak(u);
+    }catch(e){ console.warn('TTS err', e); }
+  }
 }
 
-/* small utility to escape HTML content */
-function escapeHtml(str){ if(!str && str !== 0) return ''; return String(str).replace(/[&<>"'`=\/]/g, function(s){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#x2F;','`':'&#x60;','=':'&#x3D;'}[s]; }); }
+/* ========= Review wrong ========= */
+function reviewWrongQuestions(){
+  // jump to first wrong
+  for(let i=0;i<quizData.length;i++){
+    if(answers[i] !== quizData[i].answer){ currentQuestion = i; renderQuestion(); return; }
+  }
+  alert('No wrong questions to review.');
+}
 
-/* Keyboard shortcuts for navigation (left/right) */
-document.addEventListener('keydown', (e)=>{
-  if(e.key === 'ArrowLeft') prevBtn.click();
-  if(e.key === 'ArrowRight') nextBtn.click();
-  if(e.key === 'b' || e.key === 'B') bookmarkBtn.click();
-});
+/* ========= Download summary (simple text) ========= */
+function downloadSummary(){
+  let text = scoreText.innerText + '\n\n';
+  text += 'Detailed results:\n';
+  quizData.forEach((q,i)=> {
+    text += `Q${i+1}: ${q.question}\nYour: ${answers[i] || 'Not answered'}\nCorrect: ${q.answer}\n\n`;
+  });
+  const blob = new Blob([text], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'quiz_summary.txt'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+}
 
-/* Save local when leaving page */
-window.addEventListener('beforeunload', saveLocalState);
+/* ========= Helpers ========= */
+function escapeHtml(s){ if(!s) return ''; return s.replaceAll && s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+function escapeAttr(s){ return (s||'').replaceAll('"','&quot;').replaceAll("'",'&#39;'); }
+
 </script>
-
 </body>
 </html>
