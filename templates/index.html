@@ -1,43 +1,64 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
 <meta charset="UTF-8">
 <title>Quizroom Academy</title>
+
+<!-- Tailwind -->
 <script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Google Font -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
 <style>
-body { font-family: 'Inter', sans-serif; }
+body { font-family: 'Inter', sans-serif; transition: background 0.4s, color 0.4s; }
 .card:hover { transform: scale(1.03); transition: all 0.3s ease; }
-.badge { animation: bounce 1s infinite; }
-@keyframes bounce { 0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);} }
 </style>
+
+<script>
+// Tailwind dark mode class setup
+tailwind.config = {
+  darkMode: 'class'
+}
+</script>
 </head>
-<body class="bg-gray-50 p-6">
 
-<div class="max-w-5xl mx-auto bg-white p-6 rounded-xl shadow-lg">
+<body class="bg-gray-50 dark:bg-gray-900 p-6 text-gray-900 dark:text-gray-200">
 
-<h1 class="text-4xl font-bold text-center mb-6 text-blue-700">Quizroom Academy</h1>
+<div class="max-w-5xl mx-auto bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
 
-<!-- Exam & Subtopic Selection -->
+<!-- Header -->
+<div class="flex justify-between items-center">
+  <h1 class="text-3xl font-bold mb-6 text-blue-700 dark:text-blue-300">Quizroom Academy</h1>
+
+  <!-- Theme Toggle -->
+  <button id="themeToggle" class="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600">
+    🌙 Night Mode
+  </button>
+</div>
+
+<!-- Exam & Topic Select -->
 <div class="mb-4 text-center flex flex-wrap justify-center items-center gap-3">
   <label class="font-semibold">Select Exam:</label>
-  <select id="examSelect" class="border rounded px-3 py-1">
+  <select id="examSelect" class="border rounded px-3 py-1 dark:bg-gray-700 dark:border-gray-600">
     <option value="upsc">UPSC</option>
     <option value="neet_pg">NEET PG</option>
     <option value="ssc">SSC</option>
   </select>
 
   <label class="font-semibold ml-2">Select Year / Topic:</label>
-  <select id="subtopicSelect" class="border rounded px-3 py-1"></select>
+  <select id="subtopicSelect" class="border rounded px-3 py-1 dark:bg-gray-700 dark:border-gray-600"></select>
 
   <button id="loadBtn" class="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600">Load Quiz</button>
 </div>
 
-<!-- Live Score & Progress -->
+<!-- Score + Progress -->
 <div class="flex justify-between items-center mb-4">
-  <div id="liveScore" class="text-lg font-semibold text-blue-700">Score: 0</div>
-  <div class="w-1/2 bg-gray-200 h-4 rounded">
+  <div id="liveScore" class="text-lg font-semibold text-blue-700 dark:text-blue-300">Score: 0</div>
+  <div class="w-1/2 bg-gray-200 dark:bg-gray-700 h-4 rounded">
     <div id="progressBar" class="h-4 bg-green-500 rounded w-0 transition-all"></div>
   </div>
 </div>
@@ -45,45 +66,42 @@ body { font-family: 'Inter', sans-serif; }
 <!-- Quiz Container -->
 <div id="quizContainer" class="mt-6 grid gap-4"></div>
 
-<!-- Navigation + Bookmark -->
+<!-- Navigation -->
 <div class="mt-4 flex justify-between hidden" id="navButtons">
-  <button id="prevBtn" class="bg-gray-300 px-4 py-1 rounded hover:bg-gray-400">Previous</button>
-  <button id="nextBtn" class="bg-gray-300 px-4 py-1 rounded hover:bg-gray-400">Next</button>
+  <button id="prevBtn" class="bg-gray-300 dark:bg-gray-700 px-4 py-1 rounded hover:bg-gray-400 dark:hover:bg-gray-600">Previous</button>
+  <button id="nextBtn" class="bg-gray-300 dark:bg-gray-700 px-4 py-1 rounded hover:bg-gray-400 dark:hover:bg-gray-600">Next</button>
 </div>
-<div class="mt-2 text-center">
-  <button id="bookmarkBtn" class="bg-yellow-400 px-4 py-1 rounded hidden hover:bg-yellow-500">Bookmark</button>
-</div>
+
+<!-- Submit Button -->
 <div class="mt-4 text-center">
   <button id="submitBtn" class="bg-green-500 text-white px-6 py-2 rounded hidden hover:bg-green-600">Submit Quiz</button>
 </div>
 
-<!-- Topic Chart -->
-<div id="topicChartContainer" class="mt-6 p-4 bg-white shadow-lg rounded-lg" style="display:none;">
-  <h2 class="text-xl font-bold mb-2 text-gray-700">Topic-wise Performance</h2>
+<!-- Chart -->
+<div id="topicChartContainer" class="mt-6 p-4 bg-white dark:bg-gray-800 shadow-lg rounded-lg hidden">
+  <h2 class="text-xl font-bold mb-2 text-gray-700 dark:text-gray-300">Topic-wise Performance</h2>
   <canvas id="topicChart"></canvas>
 </div>
 
 <!-- AI Summary -->
-<div id="aiSummaryCard" class="mt-6 p-4 bg-green-50 border-l-4 border-green-500 rounded-lg shadow-lg" style="display:none;">
-  <h2 class="font-bold text-lg mb-2 text-green-700">AI Study Recommendations</h2>
-  <p id="aiSummaryText" class="text-gray-800"></p>
+<div id="aiSummaryCard" class="mt-6 p-4 bg-green-50 dark:bg-green-900 border-l-4 border-green-500 rounded-lg shadow-lg hidden">
+  <h2 class="font-bold text-lg mb-2 text-green-700 dark:text-green-300">AI Study Recommendations</h2>
+  <p id="aiSummaryText"></p>
 </div>
 
 <script>
-let quizData=[], currentQuestion=0, answers={}, bookmarks=[];
-const examSelect=document.getElementById("examSelect");
-const subtopicSelect=document.getElementById("subtopicSelect");
-const quizContainer=document.getElementById("quizContainer");
-const loadBtn=document.getElementById("loadBtn");
-const prevBtn=document.getElementById("prevBtn");
-const nextBtn=document.getElementById("nextBtn");
-const submitBtn=document.getElementById("submitBtn");
-const bookmarkBtn=document.getElementById("bookmarkBtn");
-const navButtons=document.getElementById("navButtons");
-const progressBar=document.getElementById("progressBar");
-const liveScore=document.getElementById("liveScore");
+let quizData=[], currentQuestion=0, answers={};
 
-// Load subtopics
+// Theme Toggle
+const themeBtn = document.getElementById("themeToggle");
+themeBtn.addEventListener("click",()=>{
+  document.documentElement.classList.toggle("dark");
+  themeBtn.textContent = document.documentElement.classList.contains("dark")
+    ? "☀️ Day Mode"
+    : "🌙 Night Mode";
+});
+
+// Subtopics
 function loadSubtopics(){
   fetch(`/get_subtopics/${examSelect.value}`)
     .then(res=>res.json())
@@ -104,70 +122,70 @@ loadBtn.addEventListener("click",()=>{
   fetch(`/get-quiz/${examSelect.value}/${subtopicSelect.value}`)
     .then(res=>res.json())
     .then(data=>{
-      quizData=data;
-      currentQuestion=0; answers={}; bookmarks=[];
+      quizData=data; currentQuestion=0; answers={};
       renderQuestion();
       navButtons.classList.remove("hidden");
       submitBtn.classList.remove("hidden");
-      bookmarkBtn.classList.remove("hidden");
-      updateProgressBar();
-      updateLiveScore();
+      updateProgressBar(); updateLiveScore();
     });
 });
 
 // Render Question
 function renderQuestion(){
   const q=quizData[currentQuestion];
-  let html=`<div class="p-4 border rounded shadow-lg bg-white card">
-              <div class="flex justify-between items-center">
-                <p class="font-semibold text-lg">Q${currentQuestion+1}: ${q.question}</p>
-                <span class="px-2 py-1 rounded bg-blue-100 text-blue-800">${bookmarks.includes(currentQuestion)?"Bookmarked":""}</span>
-              </div>`;
+  let html=`<div class="p-4 border rounded shadow-lg bg-white dark:bg-gray-700 card">
+              <p class="font-semibold text-lg">Q${currentQuestion+1}: ${q.question}</p>`;
   q.options.forEach(option=>{
-    const checked=answers[currentQuestion]===option?"checked":"";
-    html+=`<label class="block mt-2 p-2 border rounded cursor-pointer hover:bg-gray-100 ${answers[currentQuestion]===option?'bg-blue-50 border-blue-400':''}">
-              <input type="radio" name="q${currentQuestion}" value="${option}" ${checked} class="mr-2">${option}
+    const checked = answers[currentQuestion]===option ? "checked" : "";
+    html+=`<label class="block mt-2 p-2 border rounded cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 ${checked?'bg-blue-100 dark:bg-blue-700':''}">
+            <input type="radio" name="q${currentQuestion}" value="${option}" ${checked} class="mr-2">${option}
            </label>`;
   });
   html+="</div>";
   quizContainer.innerHTML=html;
-  speakQuestion(q.question);
-  highlightBookmark();
 }
 
 // Navigation
-prevBtn.addEventListener("click",()=>{ saveAnswer(); if(currentQuestion>0){currentQuestion--; renderQuestion();}});
-nextBtn.addEventListener("click",()=>{ saveAnswer(); if(currentQuestion<quizData.length-1){currentQuestion++; renderQuestion();}});
-function saveAnswer(){ const selected=document.querySelector(`input[name='q${currentQuestion}']:checked`); answers[currentQuestion]=selected?selected.value:""; updateProgressBar(); updateLiveScore();}
+prevBtn.onclick=()=>{ saveAnswer(); if(currentQuestion>0){currentQuestion--; renderQuestion();}};
+nextBtn.onclick=()=>{ saveAnswer(); if(currentQuestion<quizData.length-1){currentQuestion++; renderQuestion();}};
+function saveAnswer(){
+  const sel=document.querySelector(`input[name='q${currentQuestion}']:checked`);
+  answers[currentQuestion]=sel?sel.value:"";
+  updateProgressBar(); updateLiveScore();
+}
 
-// Progress & Live Score
-function updateProgressBar(){ let percent=(Object.keys(answers).length/quizData.length)*100; progressBar.style.width=percent+"%";}
-function updateLiveScore(){ let score=0; for(let i=0;i<quizData.length;i++){ if(answers[i]===quizData[i].answer) score++;} liveScore.innerText=`Score: ${score} / ${quizData.length}`;}
+// Progress + Live Score
+function updateProgressBar(){
+  let percent=(Object.keys(answers).length/quizData.length)*100;
+  progressBar.style.width = percent+"%";
+}
+function updateLiveScore(){
+  let score=0;
+  quizData.forEach((q,i)=>{ if(answers[i]===q.answer) score++; });
+  liveScore.textContent = `Score: ${score} / ${quizData.length}`;
+}
 
-// Bookmark
-bookmarkBtn.addEventListener("click",()=>{ if(!bookmarks.includes(currentQuestion)) bookmarks.push(currentQuestion); highlightBookmark();});
-function highlightBookmark(){ if(bookmarks.includes(currentQuestion)) bookmarkBtn.classList.add("bg-yellow-600"); else bookmarkBtn.classList.remove("bg-yellow-600");}
-
-// Submit
-submitBtn.addEventListener("click",()=>{
+// Submit Quiz
+submitBtn.onclick=()=>{
   saveAnswer();
-  fetch(`/submit/${examSelect.value}/${subtopicSelect.value}`, {
+  fetch(`/submit/${examSelect.value}/${subtopicSelect.value}`,{
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body:JSON.stringify(answers)
   }).then(res=>res.json()).then(data=>{
-    renderResultCards();
+    renderResults();
     renderTopicChart(data.incorrect_questions);
-    document.getElementById("aiSummaryText").innerText=data.ai_summary;
-    document.getElementById("aiSummaryCard").style.display="block";
+    aiSummaryText.textContent=data.ai_summary;
+    aiSummaryCard.classList.remove("hidden");
   });
-});
+};
 
-// Render Result Cards
-function renderResultCards(){
+// Results
+function renderResults(){
   quizContainer.innerHTML="";
   quizData.forEach((q,i)=>{
-    let color=answers[i]===q.answer?"bg-green-100 border-green-400":"bg-red-100 border-red-400";
+    let correct = answers[i]===q.answer;
+    let color = correct ? "bg-green-100 dark:bg-green-800 border-green-400" : "bg-red-100 dark:bg-red-800 border-red-400";
     quizContainer.innerHTML+=`<div class="p-4 border-l-4 ${color} rounded shadow-lg mb-2">
         <p class="font-semibold">Q${i+1}: ${q.question}</p>
         <p>Your Answer: ${answers[i]||"Not Answered"}</p>
@@ -176,19 +194,28 @@ function renderResultCards(){
   });
 }
 
-// Topic Chart
-function renderTopicChart(incorrectQuestions){
-  const topicCounts={};
-  quizData.forEach((q,i)=>{ let topic=subtopicSelect.value; if(!topicCounts[topic]) topicCounts[topic]=0; if(answers[i]!==q.answer) topicCounts[topic]++;});
+// Chart
+function renderTopicChart(incorrect){
   const ctx=document.getElementById("topicChart").getContext("2d");
-  new Chart(ctx,{ type:'bar', data:{ labels:Object.keys(topicCounts), datasets:[{ label:'Incorrect Questions', data:Object.values(topicCounts), backgroundColor:'rgba(255,99,132,0.6)' }] }, options:{responsive:true, plugins:{legend:{display:false}}} });
-  document.getElementById("topicChartContainer").style.display="block";
+  new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:[subtopicSelect.value],
+      datasets:[{
+        label:'Incorrect Questions',
+        data:[incorrect.length],
+        backgroundColor:['rgba(75, 192, 192, 0.6)'],
+        borderRadius:8
+      }]
+    },
+    options:{
+      responsive:true,
+      scales:{ y:{ beginAtZero:true, grid:{display:true} }, x:{ grid:{display:false} } }
+    }
+  });
+  topicChartContainer.classList.remove("hidden");
 }
-
-// TTS
-function speakQuestion(text){ if('speechSynthesis' in window){ const msg=new SpeechSynthesisUtterance(text); window.speechSynthesis.speak(msg);}}
 </script>
-
 </div>
 </body>
 </html>
