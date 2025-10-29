@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Quizroom Academy</title>
+<title>Quizroom Academy — Interactive</title>
 
 <!-- Tailwind (CDN) -->
 <script src="https://cdn.tailwindcss.com"></script>
@@ -13,75 +13,82 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <style>
-  :root{
-    --glass-bg: rgba(255,255,255,0.14);
-    --glass-border: rgba(255,255,255,0.18);
-    --card-radius: 14px;
-    --max-width: 1100px;
-  }
-  html,body { height:100%; font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
-  body { margin:0; background-size:400% 400%; transition: background 600ms ease; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+:root{
+  --glass-bg: rgba(255,255,255,0.16);
+  --glass-border: rgba(255,255,255,0.18);
+  --card-radius: 12px;
+  --max-width: 1100px;
+}
+/* base */
+html,body{height:100%;font-family:"Inter",system-ui,-apple-system,"Segoe UI",Roboto, "Helvetica Neue",Arial;}
+body{margin:0;transition:background 500ms ease;color: #0f172a;}
 
-  /* Glass panel */
-  .glass {
-    background: var(--glass-bg);
-    backdrop-filter: blur(10px) saturate(120%);
-    -webkit-backdrop-filter: blur(10px) saturate(120%);
-    border: 1px solid var(--glass-border);
-  }
+/* glass */
+.glass{ background: var(--glass-bg); backdrop-filter: blur(10px) saturate(120%); -webkit-backdrop-filter: blur(10px) saturate(120%); border: 1px solid var(--glass-border); }
 
-  /* Card hover */
-  .card-hover { transition: transform .22s cubic-bezier(.2,.9,.3,1), box-shadow .22s ease; }
-  .card-hover:hover { transform: translateY(-6px) scale(1.01); box-shadow:0 20px 40px rgba(2,6,23,0.12); }
+/* cards */
+.card-hover{ transition:transform .22s cubic-bezier(.2,.9,.3,1), box-shadow .22s ease; }
+.card-hover:hover{ transform: translateY(-6px) scale(1.01); box-shadow:0 20px 40px rgba(2,6,23,0.08); }
 
-  /* Small buttons */
-  .btn-sm { padding:.5rem .75rem; border-radius:8px; }
+/* backgrounds (vibrant exam themes) */
+.bg-upsc{ background: linear-gradient(120deg,#e6f0ff 0%,#dbeeff 40%,#ffffff 100%); }
+.bg-neet{ background: linear-gradient(120deg,#faf5ff 0%,#f3e8ff 40%,#ffffff 100%); }
+.bg-ssc{ background: linear-gradient(120deg,#f0fff4 0%,#dcfce7 40%,#ffffff 100%); }
 
-  /* Floating live score */
-  #liveBadge { position: fixed; right: 16px; top: 16px; z-index:60; box-shadow: 0 10px 30px rgba(2,6,23,0.12); }
+/* academic (white) */
+.bg-academic{ background: linear-gradient(180deg,#ffffff,#fbfdff); }
 
-  /* Responsive layout adjustments */
-  .app-max { max-width: var(--max-width); }
+/* option button */
+.option-btn{ width:100%; display:block; text-align:left; }
 
-  /* Background animations for themes */
-  .bg-upsc { background: linear-gradient(120deg,#0ea5e9 0%,#3b82f6 40%,#60a5fa 100%); animation: move 12s ease infinite; }
-  .bg-neet { background: linear-gradient(120deg,#7c3aed 0%,#d946ef 45%,#a78bfa 100%); animation: move 14s ease infinite; }
-  .bg-ssc  { background: linear-gradient(120deg,#16a34a 0%,#22c55e 45%,#bbf7d0 100%); animation: move 11s ease infinite; }
-  @keyframes move { 0% { background-position:0% 50% } 50% { background-position:100% 50% } 100% { background-position:0% 50% } }
+/* small helper */
+.btn-sm{ padding:.45rem .6rem; border-radius:8px; }
 
-  /* Option button mobile-friendly */
-  .option-btn { width:100%; display:block; text-align:left; }
+/* ad slot */
+.ad-slot{ background: linear-gradient(90deg, rgba(0,0,0,0.03), rgba(255,255,255,0.02)); border:1px dashed rgba(0,0,0,0.04); padding:8px; border-radius:8px; color:rgba(15,23,42,0.7); }
 
-  /* Ad placeholder */
-  .ad-slot { background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03)); border: 1px dashed rgba(255,255,255,0.08); padding:8px; border-radius:8px; color:rgba(255,255,255,0.8); }
+/* result */
+.result-correct{ background:#ecfdf5; border-left:4px solid #10b981; }
+.result-wrong{ background:#fff0f0; border-left:4px solid #ef4444; }
 
-  /* result styles */
-  .result-correct { background: rgba(16,185,129,0.12); border-left: 4px solid rgba(16,185,129,0.9); }
-  .result-wrong { background: rgba(239,68,68,0.08); border-left: 4px solid rgba(239,68,68,0.9); }
+/* small screens */
+@media (max-width:880px){
+  .sidebar{ display:none; }
+  .app-max{ padding: 0 1rem; }
+}
 
-  /* small screens tweak */
-  @media (max-width: 880px) {
-    .sidebar { display:none; }
-    .app-max { padding: 1rem; }
-  }
+/* tts controls */
+.tts-control { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.range { width:120px; }
+
+/* swipe hint */
+.swipe-hint { font-size:12px; color: rgba(15,23,42,0.6); }
+
+/* accessible focus */
+:focus{ outline: 3px solid rgba(59,130,246,0.25); outline-offset:3px; border-radius:6px; }
 </style>
 </head>
+<body class="bg-academic">
 
-<body class="min-h-screen bg-upsc">
-
-<!-- NAVBAR -->
+<!-- NAV -->
 <header class="w-full glass sticky top-0 z-50">
   <div class="app-max mx-auto flex items-center justify-between px-4 py-3">
     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center text-white font-bold">QA</div>
+      <div class="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center font-bold">QA</div>
       <div>
-        <div class="text-white font-semibold text-lg">Quizroom Academy</div>
-        <div class="text-white/80 text-xs">Smart MCQ practice for students</div>
+        <div class="text-slate-900 font-semibold text-lg">Quizroom Academy</div>
+        <div class="text-slate-500 text-xs">Smart MCQ practice — responsive & interactive</div>
       </div>
     </div>
 
     <div class="flex items-center gap-3">
-      <button id="themeToggle" class="text-white bg-white/10 px-3 py-1 rounded btn-sm">Toggle Theme</button>
+      <div class="flex items-center gap-2">
+        <label class="text-slate-700 text-sm">Theme</label>
+        <select id="uiThemeSelect" class="rounded-md border px-2 py-1 text-sm">
+          <option value="academic">Academic (white)</option>
+          <option value="vibrant">Vibrant (exam-aware)</option>
+        </select>
+      </div>
     </div>
   </div>
 </header>
@@ -89,67 +96,79 @@
 <!-- MAIN -->
 <main class="app-max mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 px-4 py-6">
 
-  <!-- LEFT / MAIN COLUMN -->
+  <!-- LEFT — main -->
   <section class="lg:col-span-2 space-y-4">
-
-    <!-- Exam selector card -->
-    <div class="glass p-4 rounded-xl card-hover">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:gap-3 justify-between">
-        <div class="flex flex-wrap gap-3 items-center">
-          <div class="flex items-center gap-2">
-            <label class="text-white font-medium">Exam</label>
-            <select id="examSelect" class="rounded-md px-3 py-2 text-sm" aria-label="Select exam">
-              <option value="upsc">UPSC</option>
-              <option value="neet_pg">NEET PG</option>
-              <option value="ssc">SSC</option>
-            </select>
-          </div>
-
-          <div class="flex items-center gap-2">
-            <label class="text-white font-medium">Year / Topic</label>
-            <select id="subtopicSelect" class="rounded-md px-3 py-2 text-sm" aria-label="Select subtopic"></select>
-          </div>
-
-          <button id="loadBtn" class="ml-2 bg-white text-gray-800 px-4 py-2 rounded-md font-semibold hover:scale-105">Load Quiz</button>
+    <!-- selector -->
+    <div class="glass p-4 rounded-xl card-hover flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div class="flex gap-3 items-center flex-wrap">
+        <div class="flex items-center gap-2">
+          <label class="text-slate-700 font-medium">Exam</label>
+          <select id="examSelect" aria-label="Exam select" class="rounded-md border px-3 py-2 text-sm">
+            <option value="upsc">UPSC</option>
+            <option value="neet_pg">NEET PG</option>
+            <option value="ssc">SSC</option>
+          </select>
         </div>
 
-        <div class="flex gap-2 mt-3 sm:mt-0">
-          <button id="ttsToggle" class="bg-white/10 text-white px-3 py-2 rounded-md btn-sm">🔊 TTS</button>
-          <button id="bookmarkListBtn" class="bg-white/10 text-white px-3 py-2 rounded-md btn-sm">★ Bookmarks</button>
+        <div class="flex items-center gap-2">
+          <label class="text-slate-700 font-medium">Year / Topic</label>
+          <select id="subtopicSelect" aria-label="Subtopic select" class="rounded-md border px-3 py-2 text-sm"></select>
+        </div>
+
+        <button id="loadBtn" class="bg-slate-900 text-white px-4 py-2 rounded-md hover:bg-slate-800">Load Quiz</button>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="ttsToggle" class="btn-sm bg-slate-50 border">TTS</button>
+        <div class="tts-control">
+          <select id="voiceSelect" class="rounded-md border px-2 py-1 text-sm"></select>
+          <label class="text-sm text-slate-600">Rate</label>
+          <input id="rateRange" class="range" type="range" min="0.6" max="1.4" step="0.05" value="0.95">
+          <label class="text-sm text-slate-600">Vol</label>
+          <input id="volRange" class="range" type="range" min="0" max="1" step="0.05" value="1">
+          <button id="ttsPlay" class="btn-sm bg-emerald-500 text-white">Play</button>
+          <button id="ttsPause" class="btn-sm bg-yellow-300">Pause</button>
+          <button id="ttsStop" class="btn-sm bg-red-300">Stop</button>
         </div>
       </div>
     </div>
 
-    <!-- QUIZ CARD -->
-    <div id="quizArea" class="space-y-4">
-      <!-- question cards injected here -->
-      <div id="quizContainer" class="space-y-4"></div>
-
-      <!-- nav & submit -->
-      <div id="controls" class="flex flex-wrap gap-3 items-center justify-between">
-        <div class="flex gap-2">
-          <button id="prevBtn" class="bg-white/10 text-white px-4 py-2 rounded-md">Previous</button>
-          <button id="nextBtn" class="bg-white/10 text-white px-4 py-2 rounded-md">Next</button>
-        </div>
-
-        <div class="flex items-center gap-3">
-          <button id="bookmarkBtn" class="hidden bg-yellow-400 text-black px-4 py-2 rounded-md">Bookmark</button>
-          <button id="submitBtn" class="hidden bg-green-500 text-white px-4 py-2 rounded-md">Submit</button>
-        </div>
+    <!-- live score + progress -->
+    <div class="flex items-center justify-between">
+      <div class="text-slate-700 font-semibold">Live Score: <span id="liveScoreText">0 / 0</span></div>
+      <div class="w-1/2 bg-slate-100 h-3 rounded">
+        <div id="progressBarMain" class="h-3 bg-emerald-400 rounded w-0 transition-all"></div>
       </div>
     </div>
 
-    <!-- Result / AI summary area -->
+    <!-- quiz container -->
+    <div id="quizContainer" class="space-y-4"></div>
+
+    <!-- controls -->
+    <div id="controls" class="flex flex-wrap items-center justify-between gap-3">
+      <div class="flex gap-2">
+        <button id="prevBtn" class="bg-slate-50 px-4 py-2 rounded-md">Previous</button>
+        <button id="nextBtn" class="bg-slate-50 px-4 py-2 rounded-md">Next</button>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="bookmarkBtn" class="hidden bg-yellow-400 px-3 py-2 rounded-md">Bookmark</button>
+        <button id="submitBtn" class="hidden bg-emerald-500 text-white px-4 py-2 rounded-md">Submit</button>
+      </div>
+    </div>
+
+    <!-- results & ai summary -->
     <div id="resultArea" class="space-y-4">
       <div id="resultHeader" class="hidden glass p-4 rounded-xl">
         <div class="flex items-center justify-between">
           <div>
-            <div id="scoreText" class="text-white text-lg font-semibold">Your Score: 0 / 0</div>
-            <div id="badgeText" class="text-white/80 text-sm mt-1">Badge: —</div>
+            <div id="scoreText" class="text-slate-900 font-semibold">Your Score: 0 / 0</div>
+            <div id="badgeText" class="text-slate-600 text-sm">Badge: —</div>
           </div>
-          <div class="text-right">
-            <button id="reviewWrongBtn" class="bg-white/10 text-white px-3 py-1 rounded btn-sm">Review Wrong</button>
-            <button id="downloadSummaryBtn" class="bg-white/10 text-white px-3 py-1 rounded btn-sm">Download</button>
+          <div class="flex gap-2">
+            <button id="reviewWrongBtn" class="btn-sm border">Review Wrong</button>
+            <button id="downloadSummaryBtn" class="btn-sm border">Download</button>
+            <button id="shareSummaryBtn" class="btn-sm border">Share</button>
           </div>
         </div>
       </div>
@@ -157,64 +176,66 @@
       <div id="resultsList" class="space-y-2"></div>
 
       <div id="aiSummaryCard" class="hidden glass p-4 rounded-xl">
-        <h3 class="text-white font-semibold mb-2">AI Study Recommendations</h3>
-        <div id="aiSummaryText" class="text-white/90 text-sm"></div>
+        <h3 class="font-semibold mb-2">AI Study Recommendations</h3>
+        <div id="aiSummaryText" class="text-sm text-slate-800"></div>
       </div>
+
     </div>
 
-    <!-- bottom ad placeholder (mobile) -->
+    <!-- mobile ad slot -->
     <div class="lg:hidden mt-4">
-      <div class="ad-slot text-center py-3 rounded-md">Ad slot (mobile bottom) — reserved</div>
+      <div class="ad-slot text-center py-3 rounded-md">Ad placeholder (mobile)</div>
     </div>
+
   </section>
 
-  <!-- RIGHT / SIDEBAR -->
+  <!-- RIGHT — sidebar -->
   <aside class="sidebar lg:col-span-1 space-y-4">
-    <!-- live score floating (desktop) -->
-    <div id="liveBadge" class="hidden lg:block glass p-3 rounded-xl" style="position:sticky; top:90px;">
-      <div class="text-white font-semibold">Live Score</div>
-      <div id="liveScore" class="text-white/90 text-sm">0 / 0</div>
-      <div class="w-36 h-3 bg-white/20 rounded mt-2 overflow-hidden">
-        <div id="progressBar" class="h-3 bg-green-400 rounded w-0 transition-all"></div>
+    <div id="liveBadge" class="glass p-4 rounded-xl">
+      <div class="text-slate-800 font-semibold">Live Score</div>
+      <div id="liveScore" class="text-slate-600">0 / 0</div>
+      <div class="w-36 h-3 bg-slate-100 rounded mt-2 overflow-hidden">
+        <div id="progressBarSide" class="h-3 bg-emerald-400 rounded w-0 transition-all"></div>
       </div>
+      <div class="mt-3 text-xs text-slate-500">Swipe left/right or use Prev/Next</div>
     </div>
 
-    <!-- topic chart -->
     <div id="topicChartContainer" class="glass p-4 rounded-xl hidden">
-      <h4 class="text-white font-semibold mb-2">Topic performance</h4>
+      <h4 class="text-slate-800 font-semibold mb-2">Topic performance</h4>
       <canvas id="topicChart"></canvas>
     </div>
 
-    <!-- bookmarks panel -->
     <div id="bookmarkPanel" class="glass p-4 rounded-xl hidden">
-      <h4 class="text-white font-semibold mb-2">Bookmarked Qs</h4>
-      <div id="bookmarkList" class="text-white/90 text-sm space-y-1"></div>
+      <h4 class="text-slate-800 font-semibold mb-2">Bookmarks</h4>
+      <div id="bookmarkList" class="text-sm text-slate-700 space-y-1"></div>
     </div>
 
-    <!-- ad placeholder desktop -->
-    <div class="glass p-3 rounded-xl text-white text-sm ad-slot">
-      Ad slot (desktop) — 300x250
+    <div class="glass p-3 rounded-xl ad-slot">
+      Ad placeholder (desktop)
     </div>
   </aside>
 
 </main>
 
-<!-- FOOTER / sticky ad -->
+<!-- footer ad -->
 <footer class="fixed left-0 right-0 bottom-0 lg:hidden p-2 z-40">
   <div class="mx-auto max-w-md text-center">
-    <div class="ad-slot">Bottom Ad placeholder — reserve spacing</div>
+    <div class="ad-slot">Bottom ad placeholder</div>
   </div>
 </footer>
 
-<!-- SCRIPT: app logic -->
+<!-- APP SCRIPT -->
 <script>
-/* ========= App state ========= */
+/* ---------------- state ---------------- */
 let quizData = [];
 let currentQuestion = 0;
-let answers = {};         // { index: option }
-let bookmarks = [];       // array of question indices
+let answers = {};
+let bookmarks = [];
 let ttsEnabled = true;
-let activeTheme = 'upsc';
+let utterance = null;
+let isPaused = false;
+let voices = [];
+let topicChart = null;
 
 /* DOM refs */
 const examSelect = document.getElementById('examSelect');
@@ -225,7 +246,6 @@ const prevBtn = document.getElementById('prevBtn');
 const nextBtn = document.getElementById('nextBtn');
 const submitBtn = document.getElementById('submitBtn');
 const bookmarkBtn = document.getElementById('bookmarkBtn');
-const bookmarkListBtn = document.getElementById('bookmarkListBtn');
 const bookmarkPanel = document.getElementById('bookmarkPanel');
 const bookmarkList = document.getElementById('bookmarkList');
 const topicChartContainer = document.getElementById('topicChartContainer');
@@ -235,321 +255,352 @@ const resultHeader = document.getElementById('resultHeader');
 const resultsList = document.getElementById('resultsList');
 const scoreText = document.getElementById('scoreText');
 const badgeText = document.getElementById('badgeText');
-const liveScoreEls = document.querySelectorAll('#liveScore');
-const progressBarEls = document.querySelectorAll('#progressBar');
+const liveScoreText = document.getElementById('liveScoreText');
+const liveScore = document.getElementById('liveScore');
+const progressBarMain = document.getElementById('progressBarMain');
+const progressBarSide = document.getElementById('progressBarSide');
+
 const ttsToggle = document.getElementById('ttsToggle');
-const themeToggle = document.getElementById('themeToggle');
+const voiceSelect = document.getElementById('voiceSelect');
+const rateRange = document.getElementById('rateRange');
+const volRange = document.getElementById('volRange');
+const ttsPlay = document.getElementById('ttsPlay');
+const ttsPause = document.getElementById('ttsPause');
+const ttsStop = document.getElementById('ttsStop');
+const uiThemeSelect = document.getElementById('uiThemeSelect');
+
 const reviewWrongBtn = document.getElementById('reviewWrongBtn');
 const downloadSummaryBtn = document.getElementById('downloadSummaryBtn');
+const shareSummaryBtn = document.getElementById('shareSummaryBtn');
 
-/* Chart instance */
-let topicChart = null;
+/* theme map for vibrant mode */
+const themeMap = { upsc: 'bg-upsc', neet_pg: 'bg-neet', ssc: 'bg-ssc' };
 
-/* Theme backgrounds */
-const themeMap = {
-  upsc: 'bg-upsc',
-  neet_pg: 'bg-neet',
-  ssc: 'bg-ssc'
-};
-
-/* ================= Init ================= */
-function init() {
+/* ---------------- init ---------------- */
+function init(){
   loadSubtopics();
-  examSelect.addEventListener('change', onExamChange);
-  loadBtn.addEventListener('click', onLoadQuiz);
-  prevBtn.addEventListener('click', onPrev);
-  nextBtn.addEventListener('click', onNext);
-  submitBtn.addEventListener('click', onSubmit);
-  bookmarkBtn.addEventListener('click', onBookmarkCurrent);
-  bookmarkListBtn.addEventListener('click', toggleBookmarkPanel);
-  ttsToggle.addEventListener('click', ()=>{ ttsEnabled = !ttsEnabled; ttsToggle.textContent = ttsEnabled? '🔊 TTS' : '🔈 TTS'; });
-  themeToggle.addEventListener('click', ()=>{ document.body.classList.toggle('invert'); });
-  reviewWrongBtn.addEventListener('click', reviewWrongQuestions);
-  downloadSummaryBtn.addEventListener('click', downloadSummary);
+  bindUI();
+  setupTTS();
+  loadFromLocal();
+  // keyboard nav
+  window.addEventListener('keydown', (e)=>{
+    if(e.key === 'ArrowLeft') prevQuestion();
+    if(e.key === 'ArrowRight') nextQuestion();
+  });
+  // swipe support (very small)
+  addSwipeSupport();
 }
 init();
 
-/* ========= Subtopics ========= */
-function loadSubtopics(){
-  fetch(`/get_subtopics/${examSelect.value}`)
-    .then(r=>r.json())
-    .then(list=>{
-      subtopicSelect.innerHTML = '';
-      if(!list || list.length===0){ subtopicSelect.innerHTML = '<option value="">No topics</option>'; return; }
-      list.forEach(s=>{
-        const opt = document.createElement('option'); opt.value = s; opt.innerText = s; subtopicSelect.appendChild(opt);
-      });
-    });
+/* ---------------- helpers ---------------- */
+function fetchJSON(url){ return fetch(url).then(r => r.json()); }
+function el(html){ const div = document.createElement('div'); div.innerHTML = html; return div.firstElementChild; }
+function saveToLocal(){ localStorage.setItem('quizroom_state', JSON.stringify({answers, bookmarks, exam: examSelect.value, sub: subtopicSelect.value})); }
+function loadFromLocal(){
+  try{
+    const s = JSON.parse(localStorage.getItem('quizroom_state') || '{}');
+    if(s && s.exam) { examSelect.value = s.exam; loadSubtopics().then(()=>{ if(s.sub) subtopicSelect.value = s.sub; }); answers = s.answers || {}; bookmarks = s.bookmarks || []; }
+  }catch(e){}
 }
 
-function onExamChange(e){
-  const exam = examSelect.value;
-  // Update background theme
-  Object.values(themeMap).forEach(c=> document.body.classList.remove(c));
-  const themeClass = themeMap[exam] || themeMap.upsc;
-  document.body.classList.add(themeClass);
-  // Load subtopics for new exam
+/* ---------------- UI binding ---------------- */
+function bindUI(){
+  examSelect.addEventListener('change', onExamChange);
+  uiThemeSelect.addEventListener('change', onUIThemeChange);
+  loadBtn.addEventListener('click', onLoadQuiz);
+  prevBtn.addEventListener('click', prevQuestion);
+  nextBtn.addEventListener('click', nextQuestion);
+  submitBtn.addEventListener('click', onSubmit);
+  bookmarkBtn.addEventListener('click', onBookmarkCurrent);
+  bookmarkPanel.addEventListener('click', ()=> bookmarkPanel.classList.toggle('hidden'));
+  ttsToggle.addEventListener('click', ()=>{ ttsEnabled = !ttsEnabled; ttsToggle.classList.toggle('bg-slate-200'); });
+  ttsPlay.addEventListener('click', ()=> playTTSCurrent());
+  ttsPause.addEventListener('click', ()=> pauseTTS());
+  ttsStop.addEventListener('click', ()=> stopTTS());
+  reviewWrongBtn.addEventListener('click', reviewWrongQuestions);
+  downloadSummaryBtn.addEventListener('click', downloadSummary);
+  shareSummaryBtn.addEventListener('click', shareSummary);
+}
+
+/* ---------------- subtopics ---------------- */
+function loadSubtopics(){
+  return fetchJSON(`/get_subtopics/${examSelect.value}`).then(list=>{
+    subtopicSelect.innerHTML = '';
+    if(!list || list.length===0){ subtopicSelect.innerHTML = '<option value="">No topics</option>'; return; }
+    list.forEach(s => { const o = document.createElement('option'); o.value = s; o.innerText = s; subtopicSelect.appendChild(o); });
+  }).catch(()=>{ subtopicSelect.innerHTML = '<option value="">No topics</option>'; });
+}
+function onExamChange(){
+  // update background only in vibrant mode
+  if(uiThemeSelect.value === 'vibrant'){
+    Object.values(themeMap).forEach(c => document.body.classList.remove(c));
+    const cls = themeMap[examSelect.value] || themeMap.upsc;
+    document.body.classList.add(cls);
+  }
   loadSubtopics();
 }
 
-/* ========= Load quiz ========= */
+/* ---------------- load quiz ---------------- */
 function onLoadQuiz(){
-  const exam = examSelect.value;
-  const sub = subtopicSelect.value;
-  if(!sub){ alert('Select a year/topic'); return; }
-  fetch(`/get-quiz/${exam}/${sub}`)
-    .then(r => r.json())
-    .then(data => {
-      quizData = data || [];
-      currentQuestion = 0;
-      answers = {};
-      bookmarks = [];
-      renderQuestion();
-      // show controls
-      document.getElementById('controls').classList.remove('hidden');
-      bookmarkBtn.classList.remove('hidden');
-      submitBtn.classList.remove('hidden');
-      // hide previous result sections
-      document.getElementById('resultsList').innerHTML = '';
-      aiSummaryCard.classList.add('hidden');
-      topicChartContainer.classList.add('hidden');
-      resultHeader.classList.add('hidden');
-      // update UI
-      updateProgress();
-      updateLiveScore();
-      updateBookmarkPanel();
-    })
-    .catch(err=>{
-      console.error(err);
-      alert('Failed to load quiz');
-    });
+  const exam = examSelect.value, sub = subtopicSelect.value;
+  if(!sub){ alert('Please select a year/topic'); return; }
+  fetchJSON(`/get-quiz/${exam}/${sub}`).then(data=>{
+    quizData = Array.isArray(data) ? data : [];
+    currentQuestion = 0; answers = {}; bookmarks = [];
+    renderQuestion();
+    // show controls
+    bookmarkBtn.classList.remove('hidden'); submitBtn.classList.remove('hidden');
+    resultHeader.classList.add('hidden'); resultsList.innerHTML = ''; aiSummaryCard.classList.add('hidden'); topicChartContainer.classList.add('hidden');
+    updateProgress(); updateLiveScore(); updateBookmarkPanel();
+    saveToLocal();
+  }).catch(err=>{ console.error(err); alert('Failed to load quiz'); });
 }
 
-/* ========= Render question card ========= */
+/* ---------------- render question ---------------- */
 function renderQuestion(){
-  if(!quizData || quizData.length===0){
-    quizContainer.innerHTML = `<div class="glass p-4 rounded-xl text-white/90">No questions found for this selection.</div>`;
-    return;
+  if(!quizData || quizData.length === 0){
+    quizContainer.innerHTML = `<div class="glass p-4 rounded-xl">No questions found.</div>`; return;
   }
   const q = quizData[currentQuestion];
-  // mobile-friendly option buttons
-  let html = `<div class="glass p-4 rounded-xl card-hover text-white">
-        <div class="flex justify-between items-start mb-2">
-          <div>
-            <div class="text-sm text-white/80">Question ${currentQuestion+1} of ${quizData.length}</div>
-            <h3 class="text-lg font-semibold mt-1">${escapeHtml(q.question)}</h3>
-          </div>
-          <div class="text-right">
-            <div class="text-xs text-white/70 mb-1">${bookmarks.includes(currentQuestion)? '★ Bookmarked' : ''}</div>
-            <div class="text-xs text-white/70">Difficulty: ${q.difficulty || '—'}</div>
-          </div>
-        </div>
-        <div class="grid gap-2">`;
-
-  q.options.forEach(opt=>{
-    const isChecked = answers[currentQuestion] === opt ? 'ring-2 ring-white/30 bg-white/5' : '';
-    html += `<button data-value="${escapeAttr(opt)}" class="option-btn text-left option-item glass p-3 rounded-md ${isChecked}">
-        <div class="flex items-center gap-3">
-          <div class="w-6 h-6 rounded-full border border-white/25 flex items-center justify-center text-sm text-white/90">${opt[0] ? opt[0].toUpperCase() : ''}</div>
-          <div class="flex-1 text-white">${escapeHtml(opt)}</div>
-        </div>
-      </button>`;
-  });
-
-  // audio + hint row
-  html += `</div>
-      <div class="flex items-center justify-between mt-3">
-        <div class="flex gap-2">
-          <button id="playQ" class="bg-white/10 text-white px-3 py-1 rounded btn-sm">Play</button>
-          ${q.hint ? `<button id="hintBtn" class="bg-white/10 text-white px-3 py-1 rounded btn-sm">Hint</button>` : ''}
-        </div>
-        <div class="text-sm text-white/80">Topic: ${q.topic || subtopicSelect.value}</div>
+  const total = quizData.length;
+  let html = `<div class="glass p-4 rounded-xl card-hover">
+    <div class="flex justify-between items-start mb-3">
+      <div>
+        <div class="text-sm text-slate-600">Question ${currentQuestion+1} of ${total}</div>
+        <h3 class="text-lg font-semibold mt-1 text-slate-900">${escapeHtml(q.question)}</h3>
       </div>
-    </div>`;
-
+      <div class="text-right text-sm text-slate-600">${bookmarks.includes(currentQuestion) ? '★ Bookmarked' : ''}</div>
+    </div>
+    <div class="grid gap-2">`;
+  (q.options || []).forEach(opt => {
+    const checked = answers[currentQuestion] === opt ? 'ring-2 ring-emerald-300 bg-emerald-50' : '';
+    html += `<button class="option-btn p-3 rounded-md border text-left ${checked}" data-val="${escapeAttr(opt)}">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-sm text-slate-700">${String(opt).trim().slice(0,1).toUpperCase()}</div>
+        <div class="text-slate-900">${escapeHtml(opt)}</div>
+      </div>
+    </button>`;
+  });
+  html += `</div>
+    <div class="flex items-center justify-between gap-3 mt-3">
+      <div class="flex items-center gap-2">
+        <button id="playQBtn" class="btn-sm border">Play</button>
+        ${q.hint ? `<button id="hintBtn" class="btn-sm border">Hint</button>` : ''}
+      </div>
+      <div class="text-sm text-slate-600">Topic: ${q.topic || subtopicSelect.value}</div>
+    </div>
+  </div>`;
   quizContainer.innerHTML = html;
 
   // attach option listeners
-  document.querySelectorAll('.option-item').forEach(btn=>{
-    btn.addEventListener('click', (ev)=>{
-      const val = ev.currentTarget.getAttribute('data-value');
+  quizContainer.querySelectorAll('.option-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const val = e.currentTarget.getAttribute('data-val');
       answers[currentQuestion] = val;
-      // visual toggle
-      document.querySelectorAll('.option-item').forEach(el => el.classList.remove('ring-2','ring-white/30','bg-white/5'));
-      ev.currentTarget.classList.add('ring-2','ring-white/30','bg-white/5');
-      updateProgress();
-      updateLiveScore();
+      // visual
+      quizContainer.querySelectorAll('.option-btn').forEach(x => x.classList.remove('ring-2','ring-emerald-300','bg-emerald-50'));
+      e.currentTarget.classList.add('ring-2','ring-emerald-300','bg-emerald-50');
+      updateProgress(); updateLiveScore(); saveToLocal();
     });
   });
 
-  // play & hint
-  const playBtn = document.getElementById('playQ');
-  playBtn && playBtn.addEventListener('click', ()=> speakText(q.question));
+  // play / hint handlers
+  const playQBtn = document.getElementById('playQBtn');
+  playQBtn && playQBtn.addEventListener('click', () => playTTS(q.question));
 
   const hintBtn = document.getElementById('hintBtn');
-  hintBtn && hintBtn.addEventListener('click', ()=>{
-    alert(q.hint || 'No hint available');
-  });
-
-  // highlight bookmark state UI
-  if(bookmarks.includes(currentQuestion)) bookmarkBtn.classList.add('bg-yellow-600'); else bookmarkBtn.classList.remove('bg-yellow-600');
+  hintBtn && hintBtn.addEventListener('click', () => alert(q.hint || 'No hint available'));
 }
 
-/* ========= Navigation ========= */
-function onPrev(){ if(currentQuestion>0){ currentQuestion--; renderQuestion(); } }
-function onNext(){ if(currentQuestion < quizData.length - 1){ currentQuestion++; renderQuestion(); } }
+/* ---------------- navigation ---------------- */
+function prevQuestion(){ if(currentQuestion > 0){ currentQuestion--; renderQuestion(); } }
+function nextQuestion(){ if(currentQuestion < quizData.length - 1){ currentQuestion++; renderQuestion(); } }
 
-/* ========= Bookmark ========= */
-function onBookmarkCurrent(){
-  if(!bookmarks.includes(currentQuestion)) bookmarks.push(currentQuestion);
-  updateBookmarkPanel();
-  bookmarkBtn.classList.add('bg-yellow-600');
-}
+/* ---------------- bookmark ---------------- */
+function onBookmarkCurrent(){ if(!bookmarks.includes(currentQuestion)) bookmarks.push(currentQuestion); updateBookmarkPanel(); saveToLocal(); }
 function updateBookmarkPanel(){
   bookmarkList.innerHTML = '';
-  if(bookmarks.length===0){ bookmarkList.innerHTML = '<div class="text-white/80 text-sm">No bookmarks</div>'; return; }
-  bookmarks.forEach(i=>{
+  if(!bookmarks || bookmarks.length===0){ bookmarkList.innerHTML = '<div class="text-sm text-slate-600">No bookmarks</div>'; return; }
+  bookmarks.forEach(i => {
     const q = quizData[i];
-    const el = document.createElement('div');
-    el.className = 'text-white/90 text-sm py-1 border-b border-white/6';
-    el.innerHTML = `<div class="flex justify-between items-center"><div class="flex-1 pr-2">${i+1}. ${escapeHtml(q.question)}</div>
-      <div><button data-i="${i}" class="text-xs bg-white/10 px-2 py-1 rounded">Go</button></div></div>`;
-    bookmarkList.appendChild(el);
+    const div = document.createElement('div');
+    div.className = 'flex items-center justify-between';
+    div.innerHTML = `<div class="text-sm text-slate-700 pr-2">${i+1}. ${truncate(q.question, 70)}</div>
+      <div class="flex gap-2"><button data-i="${i}" class="btn-sm border goBtn">Go</button><button data-i="${i}" class="btn-sm border removeBtn">Remove</button></div>`;
+    bookmarkList.appendChild(div);
   });
-  // attach go handlers
-  bookmarkList.querySelectorAll('button').forEach(btn=>{
-    btn.addEventListener('click', e=>{ const i = Number(e.currentTarget.getAttribute('data-i')); currentQuestion = i; renderQuestion(); toggleBookmarkPanel(); });
-  });
+  bookmarkList.querySelectorAll('.goBtn').forEach(b => b.addEventListener('click', e => { currentQuestion = Number(e.currentTarget.dataset.i); renderQuestion(); bookmarkPanel.classList.remove('hidden'); }));
+  bookmarkList.querySelectorAll('.removeBtn').forEach(b => b.addEventListener('click', e => { const idx = Number(e.currentTarget.dataset.i); bookmarks = bookmarks.filter(x => x !== idx); updateBookmarkPanel(); saveToLocal(); }));
 }
-function toggleBookmarkPanel(){ bookmarkPanel.classList.toggle('hidden'); }
 
-/* ========= Progress & Live Score ========= */
+/* ---------------- progress & live score ---------------- */
 function updateProgress(){
   const answeredCount = Object.keys(answers).length;
   const percent = quizData.length ? Math.round((answeredCount / quizData.length) * 100) : 0;
-  progressBarEls.forEach(pb => pb.style.width = percent + '%');
+  progressBarMain.style.width = percent + '%';
+  progressBarSide.style.width = percent + '%';
 }
 function updateLiveScore(){
   let score = 0;
   for(let i=0;i<quizData.length;i++){
     if(answers[i] && quizData[i] && answers[i] === quizData[i].answer) score++;
   }
-  liveScoreEls.forEach(el => el.innerText = `${score} / ${quizData.length}`);
-  // small top badge on header too
-  document.querySelectorAll('#liveScore').forEach(el=> el.innerText = `${score} / ${quizData.length}`);
+  liveScoreText.innerText = `${score} / ${quizData.length}`;
+  liveScore.innerText = `${score} / ${quizData.length}`;
 }
 
-/* ========= Submit & Results ========= */
+/* ---------------- submit & results ---------------- */
 function onSubmit(){
-  // ensure at least one answer or confirmation
-  if(Object.keys(answers).length === 0 && !confirm('You have not answered any questions. Submit anyway?')) return;
-
-  // send answers to backend
+  if(Object.keys(answers).length === 0 && !confirm('You have not answered any question. Submit anyway?')) return;
   const exam = examSelect.value, sub = subtopicSelect.value;
-  fetch(`/submit/${exam}/${sub}`, {
-    method:'POST',
-    headers:{ 'Content-Type':'application/json' },
-    body: JSON.stringify(answers)
-  }).then(r=>r.json()).then(res=>{
-    // show results header
-    resultHeader.classList.remove('hidden');
-    scoreText.innerText = `Your Score: ${res.score} / ${res.total}`;
-    // badge logic
-    const pct = res.total? (res.score / res.total) * 100 : 0;
-    let badge = 'Keep Practicing';
-    if(pct === 100) badge = 'Perfect ✅';
-    else if(pct >= 80) badge = 'Great 🥇';
-    else if(pct >= 50) badge = 'Good 👍';
-    badgeText.innerText = `Badge: ${badge}`;
-    // render result cards
-    renderResults(res);
-    // AI summary
-    aiSummaryText.innerText = res.ai_summary || '—';
-    aiSummaryCard.classList.remove('hidden');
-    // chart
-    renderTopicChart(res.incorrect_questions || []);
-  }).catch(e=>{ console.error(e); alert('Submit failed'); });
+  fetch(`/submit/${exam}/${sub}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(answers) })
+    .then(r => r.json())
+    .then(res => {
+      // header
+      resultHeader.classList.remove('hidden');
+      scoreText.innerText = `Your Score: ${res.score} / ${res.total}`;
+      const pct = res.total ? (res.score / res.total) * 100 : 0;
+      let badge = 'Keep Practicing';
+      if(pct === 100) badge = 'Perfect ✅'; else if(pct >= 80) badge = 'Excellent 🥇'; else if(pct >= 50) badge = 'Good 👍';
+      badgeText.innerText = `Badge: ${badge}`;
+      // results list
+      resultsList.innerHTML = '';
+      quizData.forEach((q,i) => {
+        const correct = answers[i] === q.answer;
+        const node = document.createElement('div');
+        node.className = `p-3 rounded-md ${correct ? 'result-correct' : 'result-wrong' }`;
+        node.innerHTML = `<div class="font-semibold text-slate-900">Q${i+1}. ${escapeHtml(q.question)}</div>
+          <div class="text-sm text-slate-700 mt-1">Your: <span class="font-medium">${escapeHtml(answers[i] || 'Not answered')}</span></div>
+          ${!correct ? `<div class="text-sm text-slate-700 mt-1">Correct: <span class="font-medium">${escapeHtml(q.answer)}</span></div>` : ''}`;
+        resultsList.appendChild(node);
+      });
+      // ai summary
+      aiSummaryText.innerText = res.ai_summary || '—';
+      aiSummaryCard.classList.remove('hidden');
+      // chart
+      renderTopicChart(res.incorrect_questions || []);
+      // save
+      saveToLocal();
+    }).catch(e => { console.error(e); alert('Submit failed'); });
 }
 
-function renderResults(res){
-  resultsList.innerHTML = '';
-  quizData.forEach((q,i)=>{
-    const correct = answers[i] === q.answer;
-    const div = document.createElement('div');
-    div.className = `p-3 rounded-md ${correct? 'result-correct' : 'result-wrong' }`;
-    div.innerHTML = `<div class="flex justify-between items-start">
-        <div class="flex-1">
-          <div class="font-semibold text-white">Q${i+1}. ${escapeHtml(q.question)}</div>
-          <div class="text-white/90 mt-1">Your Answer: <span class="font-medium">${escapeHtml(answers[i] || 'Not answered')}</span></div>
-          ${!correct? `<div class="text-white/90 mt-1">Correct: <span class="font-medium">${escapeHtml(q.answer)}</span></div>` : ''}
-        </div>
-      </div>`;
-    resultsList.appendChild(div);
-  });
-}
-
-/* ========= Chart ========= */
+/* ---------------- chart ---------------- */
 function renderTopicChart(incorrectQuestions){
-  // simple mapping: group by subtopic (for now, single subtopic)
-  const label = subtopicSelect.value || 'Topic';
-  const wrongCount = (Array.isArray(incorrectQuestions) ? incorrectQuestions.length : 0);
-  // create/destroy chart
+  const wrong = (Array.isArray(incorrectQuestions) ? incorrectQuestions.length : 0);
   if(topicChart) topicChart.destroy();
   const ctx = document.getElementById('topicChart').getContext('2d');
   topicChart = new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: ['Correct', 'Incorrect'],
-      datasets: [{
-        data: [quizData.length - wrongCount, wrongCount],
-        backgroundColor: ['#34d399','#fb7185']
-      }]
-    },
-    options: { responsive:true, plugins:{ legend:{ position:'bottom', labels:{ color: '#fff' } } } }
+    type:'doughnut',
+    data:{ labels:['Correct','Incorrect'], datasets:[{ data:[quizData.length - wrong, wrong], backgroundColor:['#34d399','#fb7185'] }] },
+    options:{ responsive:true, plugins:{ legend:{ position:'bottom' } } }
   });
   topicChartContainer.classList.remove('hidden');
-  // also show sidebar bookmark panel (desktop)
   bookmarkPanel.classList.remove('hidden');
 }
 
-/* ========= Utility: TTS ========= */
-function speakText(txt){
-  if(!ttsEnabled) return;
-  if('speechSynthesis' in window){
-    try{
-      window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(txt);
-      u.rate = 0.95; u.pitch = 1.0; u.lang = 'en-GB';
-      window.speechSynthesis.speak(u);
-    }catch(e){ console.warn('TTS err', e); }
+/* ---------------- TTS (fixed) ---------------- */
+function setupTTS(){
+  // populate voices after they load
+  function populate() {
+    voices = window.speechSynthesis.getVoices().filter(v => v.lang && v.name);
+    voiceSelect.innerHTML = '';
+    voices.forEach((v, idx) => {
+      const opt = document.createElement('option');
+      opt.value = idx; opt.innerText = `${v.name} — ${v.lang}`;
+      voiceSelect.appendChild(opt);
+    });
   }
+  populate();
+  if (typeof speechSynthesis !== 'undefined') speechSynthesis.onvoiceschanged = populate;
+
+  // ensure a user gesture happened before we try to speak (browsers require it)
+  document.addEventListener('click', () => { /* click to allow audio on some browsers */ }, { once:true });
 }
 
-/* ========= Review wrong ========= */
+function playTTS(text){
+  stopTTS();
+  if(!ttsEnabled) return;
+  if(!text) return;
+  utterance = new SpeechSynthesisUtterance(text);
+  const idx = Number(voiceSelect.value || 0);
+  if(voices[idx]) utterance.voice = voices[idx];
+  utterance.rate = Number(rateRange.value || 0.95);
+  utterance.volume = Number(volRange.value || 1);
+  utterance.onend = ()=> { utterance = null; isPaused = false; };
+  try{
+    window.speechSynthesis.speak(utterance);
+  }catch(e){
+    console.warn('TTS play error', e);
+  }
+}
+function playTTSCurrent(){
+  if(!quizData || !quizData[currentQuestion]) return;
+  playTTS(quizData[currentQuestion].question);
+}
+function pauseTTS(){
+  if(window.speechSynthesis.speaking && !isPaused){ window.speechSynthesis.pause(); isPaused = true; } else if(isPaused){ window.speechSynthesis.resume(); isPaused = false; }
+}
+function stopTTS(){ try{ window.speechSynthesis.cancel(); utterance = null; isPaused = false; }catch(e){} }
+
+/* ---------------- utility / misc ---------------- */
 function reviewWrongQuestions(){
-  // jump to first wrong
   for(let i=0;i<quizData.length;i++){
     if(answers[i] !== quizData[i].answer){ currentQuestion = i; renderQuestion(); return; }
   }
   alert('No wrong questions to review.');
 }
-
-/* ========= Download summary (simple text) ========= */
 function downloadSummary(){
   let text = scoreText.innerText + '\n\n';
-  text += 'Detailed results:\n';
-  quizData.forEach((q,i)=> {
-    text += `Q${i+1}: ${q.question}\nYour: ${answers[i] || 'Not answered'}\nCorrect: ${q.answer}\n\n`;
-  });
-  const blob = new Blob([text], { type: 'text/plain' });
+  quizData.forEach((q,i)=> { text += `Q${i+1}: ${q.question}\nYour: ${answers[i] || 'Not answered'}\nCorrect: ${q.answer}\n\n`; });
+  const blob = new Blob([text], { type:'text/plain' });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = 'quiz_summary.txt'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  const a = document.createElement('a'); a.href = url; a.download = 'quiz-summary.txt'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
 }
+function shareSummary(){
+  const text = scoreText.innerText + '\nQuizroom Academy';
+  if(navigator.share){ navigator.share({ title:'Quiz result', text }).catch(()=>{}); } else { prompt('Copy result', text); }
+}
+function truncate(s,n=80){ return s && s.length>n ? s.slice(0,n)+'...' : s || ''; }
 
-/* ========= Helpers ========= */
-function escapeHtml(s){ if(!s) return ''; return s.replaceAll && s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+function escapeHtml(s){ if(!s) return ''; return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
 function escapeAttr(s){ return (s||'').replaceAll('"','&quot;').replaceAll("'",'&#39;'); }
 
+/* ---------------- theme handling ---------------- */
+function onUIThemeChange(){
+  const mode = uiThemeSelect.value;
+  // clear all theme classes
+  Object.values(themeMap).forEach(c => document.body.classList.remove(c));
+  if(mode === 'academic'){ document.body.classList.add('bg-academic'); }
+  else { // vibrant
+    document.body.classList.remove('bg-academic');
+    document.body.classList.add(themeMap[examSelect.value] || themeMap.upsc);
+  }
+}
+uiThemeSelect.addEventListener('change', onUIThemeChange);
+
+/* ---------------- keyboard & swipe support ---------------- */
+function addSwipeSupport(){
+  let touchstartX = 0, touchendX = 0;
+  document.addEventListener('touchstart', e => touchstartX = e.changedTouches[0].screenX);
+  document.addEventListener('touchend', e => { touchendX = e.changedTouches[0].screenX; handleSwipe(); });
+  function handleSwipe(){
+    if(touchendX + 40 < touchstartX) nextQuestion();
+    if(touchendX - 40 > touchstartX) prevQuestion();
+  }
+}
+
+/* ---------------- save to local ---------------- */
+function saveToLocal(){
+  try{
+    const state = { answers, bookmarks, exam: examSelect.value, sub: subtopicSelect.value };
+    localStorage.setItem('quizroom_state_v2', JSON.stringify(state));
+  }catch(e){}
+}
+
+/* ---------------- expose to window for debugging ---------------- */
+window.__quizroom = { playTTS, stopTTS, quizData };
+
+/* ------------- End of script ------------- */
 </script>
 </body>
 </html>
